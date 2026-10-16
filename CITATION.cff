@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite the paper it builds on, as below.
+title: authzen-composition
+abstract: >-
+  The AuthZEN Mission Composition Profile, with an implementation and a
+  conformance suite, based on the ordered-composition result of Bounded Agents.
+type: software
+authors:
+  - family-names: Muruaga
+    given-names: Xabier
+version: 0.1.0
+date-released: 2026-10-16
+license: Apache-2.0
+repository-code: https://github.com/xmuruaga/authzen-composition
+keywords:
+  - authzen
+  - authorization
+  - ai-agents
+  - openid
+  - policy-enforcement
+  - bounded-agents
+preferred-citation:
+  type: article
+  title: "Bounded Agents: Delegation Security for Multi-Agent AI Systems"
+  authors:
+    - family-names: Muruaga
+      given-names: Xabier
+  year: 2026
+  doi: 10.48550/arXiv.2608.15888
+  url: https://arxiv.org/abs/2608.15888
+  identifiers:
+    - type: other
+      value: "arXiv:2608.15888"
+      description: arXiv identifier

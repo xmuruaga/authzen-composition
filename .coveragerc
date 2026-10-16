@@ -1,0 +1,12 @@
+[run]
+branch = True
+source = authzen_composition
+
+[report]
+fail_under = 100
+show_missing = True
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    raise NotImplementedError
+    \)(?:\s*->\s*[^:]+)?:\s*\.\.\.\s*$

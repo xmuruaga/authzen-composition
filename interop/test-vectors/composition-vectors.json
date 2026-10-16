@@ -1,0 +1,3442 @@
+{
+  "version": "0.1.0",
+  "profile": "AuthZEN Mission Composition Profile",
+  "note": "Each act is admitted in order and its outcome reported as given (completed, open or failed); the last act of a scenario carries the expected decision. Generated from the reference scenarios.",
+  "canonical_sequence": {
+    "name": "read_personal_write_send_external",
+    "requestable": true,
+    "steps": [
+      {
+        "action": "read_record",
+        "resources": [],
+        "result_classes": [
+          "personal_data.*"
+        ],
+        "persistent": false
+      },
+      {
+        "action": "write_document",
+        "resources": [],
+        "result_classes": [],
+        "persistent": false
+      },
+      {
+        "action": "send_message",
+        "resources": [
+          "external:*"
+        ],
+        "result_classes": [],
+        "persistent": false
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "S1",
+      "title": "Ordered composition across three PEPs is denied at the send",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Reverse order does not trigger (send before read)",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "title": "No read was admitted, so write then send is permitted: history holds only enforced acts",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        }
+      ]
+    },
+    {
+      "id": "S6",
+      "title": "Unknown result class is treated as the conservative top",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "mystery.unknown"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "S11",
+      "title": "Internal send does not complete the external-send sequence",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "internal:team"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        }
+      ]
+    },
+    {
+      "id": "V1",
+      "title": "An open read (outcome not yet reported) blocks the external send",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "open",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V2",
+      "title": "A failed read (affirmatively not run) does not count",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "failed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 3
+        }
+      ]
+    },
+    {
+      "id": "V3",
+      "title": "A send still in flight holds back a read of the same sequence",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_then_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e21b930ec90013c9e704c4cf9561388b4f0fc40df0f3e1a360eed2d4c2a82e76",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "open",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "history_pending"
+        }
+      ]
+    },
+    {
+      "id": "V4",
+      "title": "Once the send has finished, the read is admitted",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_then_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e21b930ec90013c9e704c4cf9561388b4f0fc40df0f3e1a360eed2d4c2a82e76",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 2
+        }
+      ]
+    },
+    {
+      "id": "V5",
+      "title": "Two reads matching the same single step may run concurrently",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_then_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e21b930ec90013c9e704c4cf9561388b4f0fc40df0f3e1a360eed2d4c2a82e76",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "open",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-2"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 2
+        }
+      ]
+    },
+    {
+      "id": "V6",
+      "title": "A share link created first is still live: read then write is denied",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_shared_document",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": true
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e2d891920daf69d5f998b9d99210abf5d70199a8bf6928b0752547b397849153",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V7",
+      "title": "A share link created between the read and the write is caught too",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_shared_document",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": true
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e2d891920daf69d5f998b9d99210abf5d70199a8bf6928b0752547b397849153",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V8",
+      "title": "Writing before the read puts nothing behind the link: permitted",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_shared_document",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": true
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e2d891920daf69d5f998b9d99210abf5d70199a8bf6928b0752547b397849153",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        }
+      ]
+    },
+    {
+      "id": "V9",
+      "title": "The same acts as V6 without the persistent mark: permitted",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_shared_document",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:0b770c3941646cbd0d5f2e057d857cb38eb2cbfda04c817f858db67afcfd9fda",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        }
+      ]
+    },
+    {
+      "id": "V10",
+      "title": "A recognized class does not cover an unrecognized class of the same act: the unrecognized one is the top",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ],
+        "label_domain": [
+          "personal_data.*",
+          "public.*"
+        ]
+      },
+      "policy_digest": "sha256:a04993dde5e68dcd7c72e0c56c38106e1cd11bec9659346622c38de7d1c4ecd9",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "public.faq",
+            "mystery.unknown"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V11",
+      "title": "A permit for an act that matches a step carries mission_record at the next position",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "public.faq"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 2
+        }
+      ]
+    },
+    {
+      "id": "V12",
+      "title": "A permit for an act that matches no step carries no obligation",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "list_events"
+          },
+          "resource": {
+            "id": "cal:me"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 0
+        }
+      ]
+    },
+    {
+      "id": "V13",
+      "title": "Completing a requestable and a non-requestable sequence at once: the denial MUST NOT be requestable",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_then_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          },
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:cc75fc8809178ca119522e689de05d67e58a4960e452c1e8d05c87b8a8a1903b",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition",
+          "expect_requestable": false
+        }
+      ]
+    },
+    {
+      "id": "V14",
+      "title": "Without adopting the Obligations Core, an act that needs serialization gets a plain deny",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": null,
+          "supported_mandatory_extensions": []
+        }
+      ]
+    },
+    {
+      "id": "V15",
+      "title": "A failed act still occupies its position: the candidate's position counts it",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_write_shared",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [],
+                "result_classes": [],
+                "persistent": true
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:91996b588a813f44b0e60a1d5c628e9362040235fd4b926be9dc23cda451f398",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "failed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-2"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 4,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V16",
+      "title": "A persistent middle step admitted first: a later act fills the first step and the candidate the last",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "send_share_list",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "send_message",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": true
+              },
+              {
+                "action": "list_events",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:42d6fcf5d18d9a260a621c51f10e469a7657c78edc87de308e2bc0924d8dd95d",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "external:press"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "doc:d"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "list_events"
+          },
+          "resource": {
+            "id": "cal:me"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V17",
+      "title": "A declared but empty label domain recognizes no class: every class is the top",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ],
+        "label_domain": []
+      },
+      "policy_digest": "sha256:1cfddc36a7d1ade128dc9ed210bcbf884acc928b9f3033973f84eba76e5778ec",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "fin:q4"
+          },
+          "result_classes": [
+            "finance.q4"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V18",
+      "title": "The same acts as V17 with a declared domain that recognizes the class: it does not match the step, permitted",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ],
+        "label_domain": [
+          "finance.*",
+          "personal_data.*"
+        ]
+      },
+      "policy_digest": "sha256:cc389067e6d267166ba5e0b823791ca14286c9de19123de49bccfeb3b9a71b56",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "fin:q4"
+          },
+          "result_classes": [
+            "finance.q4"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        }
+      ]
+    },
+    {
+      "id": "V19",
+      "title": "One persistent Act fills two persistent steps, at two later points",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_forward_forward",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "forward_rule",
+                "resources": [],
+                "result_classes": [],
+                "persistent": true
+              },
+              {
+                "action": "forward_rule",
+                "resources": [],
+                "result_classes": [],
+                "persistent": true
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:9c3925dda8544550f95eb17c8a00c13f7cb67381e6f3d8e7904bf4d4c8c1b4e8",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "forward_rule"
+          },
+          "resource": {
+            "id": "external:x"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V20",
+      "title": "A sequence already completed in the history (the send was approved through ARAP) does not deny a candidate that is not part of it",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        },
+        {
+          "seq": 4,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q5"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 4
+        }
+      ]
+    },
+    {
+      "id": "V21",
+      "title": "A completed read that reported no class is the conservative top: the send that completes the sequence is denied",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V22",
+      "title": "An Act that matches only the final step is serialized even on an empty history: a concurrent admission could supply the prefix",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 1
+        }
+      ]
+    },
+    {
+      "id": "V23",
+      "title": "An open read that could fill two steps holds back a read that could fill the same two: only one shared single step commutes",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_read_finance_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "finance.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:a6f959e97c1e977d1d55941ce885b2dd38115059c415516457540668cbab7de4",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "open",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "fin:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "history_pending"
+        }
+      ]
+    },
+    {
+      "id": "V24",
+      "title": "`personal_data.*` does not match `personal_data`: with the bare class recognized, the read does not fill the step",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ],
+        "label_domain": [
+          "personal_data",
+          "personal_data.*"
+        ]
+      },
+      "policy_digest": "sha256:a4cedd09bf7a6662e6866f899e85b82ef4fef4452810a4bdef8c38bcc81c9e6a",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        }
+      ]
+    },
+    {
+      "id": "V25",
+      "title": "A PEP that lists `composition` but not the Obligations Core gets a plain deny, never mission_record: `composition` is not a signal",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": null,
+          "supported_mandatory_extensions": [
+            "composition"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "V26",
+      "title": "A PEP that adopts the Obligations Core but does not list mission_record in supported_obligations gets a plain deny",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": null,
+          "supported_obligations": []
+        }
+      ]
+    },
+    {
+      "id": "V27",
+      "title": "Rule 5 as written: an open write holds back an external send even with no read in the Mission (only one shared single step commutes)",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:notes"
+          },
+          "result_classes": [],
+          "outcome": "open",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:press"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "history_pending"
+        }
+      ]
+    },
+    {
+      "id": "V28",
+      "title": "Adopting the Obligations Core and listing mission_record is enough, and an extension the PDP does not implement is ignored: the profile has no separate opt-in signal",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 1,
+          "supported_mandatory_extensions": [
+            "obligations",
+            "x-not-implemented"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "V29",
+      "title": "Rule 5 as written: an open share link (a persistent step) holds back a read of its sequence",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_shared_document",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [
+                  "doc:*"
+                ],
+                "result_classes": [],
+                "persistent": true
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e2d891920daf69d5f998b9d99210abf5d70199a8bf6928b0752547b397849153",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "open",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "history_pending"
+        }
+      ]
+    },
+    {
+      "id": "V30",
+      "title": "A persistent Act also fills a step that is not persistent, at its own position: the same forwarding rule is the first step and, later, the last",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "forward_read_forward",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "forward_rule",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "forward_rule",
+                "resources": [],
+                "result_classes": [],
+                "persistent": true
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e4b6b0dbd7ce265b67cb3e114450947d8ddfd143b71906c3d7a2955c99c2597e",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "forward_rule"
+          },
+          "resource": {
+            "id": "external:x"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V31",
+      "title": "The candidate fills two steps: one at its position and, being persistent, the last one after it",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_share_share",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "share_public",
+                "resources": [],
+                "result_classes": [],
+                "persistent": true
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:d067d02a50f038fe21ad2c3366b6c07a5c0f9bf1858cc96818b1e43e90c0ce59",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V32",
+      "title": "A declared empty label domain: a class another sequence names is still the conservative top",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_finance_archive_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "finance.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "archive",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          },
+          {
+            "name": "read_personal_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ],
+        "label_domain": []
+      },
+      "policy_digest": "sha256:8a5612a35c58c4a83d7ab525583b11b826434c7d2adfec9461788b51a9c919ff",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "fin:q4"
+          },
+          "result_classes": [
+            "finance.q4"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V33",
+      "title": "The same Acts with no declared domain: the class is recognized through the other sequence and matches no step of this one",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_finance_archive_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "finance.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "archive",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          },
+          {
+            "name": "read_personal_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:ff18a6d8a1bd957ca671bf687b0e24114c952c57f89a0c258e8cbba84fa06813",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "fin:q4"
+          },
+          "result_classes": [
+            "finance.q4"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 2
+        }
+      ]
+    },
+    {
+      "id": "V34",
+      "title": "A read that can match only a class-keyed step is Step-matching: mission_record on an empty history",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 1
+        }
+      ]
+    },
+    {
+      "id": "V35",
+      "title": "A PEP that did not adopt the Obligations Core gets prohibited_composition, not requestable: check (b) comes before (d)",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:all-staff"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition",
+          "expect_requestable": false,
+          "supported_mandatory_extensions": []
+        }
+      ]
+    },
+    {
+      "id": "V36",
+      "title": "A PEP that cannot execute mission_record gets history_pending: check (c) comes before (d)",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_write_send_external",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "write_document",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:7bbc8ae2ede9644276d027a9939a5549d69cc51f54b778a9c0cf20475a512db2",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "write_document"
+          },
+          "resource": {
+            "id": "doc:notes"
+          },
+          "result_classes": [],
+          "outcome": "open",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:press"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "history_pending",
+          "supported_obligations": []
+        }
+      ]
+    },
+    {
+      "id": "V37",
+      "title": "Rule 5 counts the steps of each sequence on its own: two reads matching only the first step of two sequences may run together",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          },
+          {
+            "name": "read_personal_upload_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "upload_file",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:d1d21f9393cf60bfb71627241d4f750b47cf05ea84d50a2259458dcd3157bd5e",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "open",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-2"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 2
+        }
+      ]
+    },
+    {
+      "id": "V38",
+      "title": "Two persistent steps take effect between the same two consecutive Acts: the points are dense",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_forward_share_list",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "forward_rule",
+                "resources": [],
+                "result_classes": [],
+                "persistent": true
+              },
+              {
+                "action": "share_public",
+                "resources": [],
+                "result_classes": [],
+                "persistent": true
+              },
+              {
+                "action": "list_events",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:6a9be7faca50894b17a5a0667f4d464cfa50765c67a3b3ae29586ee463e50e24",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "forward_rule"
+          },
+          "resource": {
+            "id": "external:x"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "share_public"
+          },
+          "resource": {
+            "id": "doc:q4"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 3,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 4,
+          "action": {
+            "name": "list_events"
+          },
+          "resource": {
+            "id": "cal:me"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "deny",
+          "expect_reason": "prohibited_composition"
+        }
+      ]
+    },
+    {
+      "id": "V39",
+      "title": "Patterns are case-sensitive: EXTERNAL:press does not match external:*",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:e8288f9478b05c0bb9c0652518b771e620f5213a2a0e5d64e3f31679af67fe7f",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "EXTERNAL:press"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 0
+        }
+      ]
+    },
+    {
+      "id": "V40",
+      "title": "Only the final * is a wildcard: external:** does not match external:x",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_send_starred",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:**"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:0a7aa20d6d6338bd84dc0545b9cfdca4eeabf04b4b1673bca2feb1849573ac73",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:x"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 0
+        }
+      ]
+    },
+    {
+      "id": "V41",
+      "title": "A * inside a pattern is literal: ext*:x matches only ext*:x",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_send_mid",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "ext*:x"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ]
+      },
+      "policy_digest": "sha256:a7cf375626be8acf65721a41486a6148054cac6e2407dcaaeb6d6f7c72955bd0",
+      "acts": [
+        {
+          "seq": 1,
+          "action": {
+            "name": "read_record"
+          },
+          "resource": {
+            "id": "hr:emp-1"
+          },
+          "result_classes": [
+            "personal_data.salary"
+          ],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null
+        },
+        {
+          "seq": 2,
+          "action": {
+            "name": "send_message"
+          },
+          "resource": {
+            "id": "external:x"
+          },
+          "result_classes": [],
+          "outcome": "completed",
+          "expect": "permit",
+          "expect_reason": null,
+          "expect_obligation_seq": 0
+        }
+      ]
+    }
+  ],
+  "digest_cases": [
+    {
+      "id": "D1",
+      "title": "Patterns and sequences out of order and repeated; two names whose canonical order differs from their order as strings",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "b_seq",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "q.*",
+                  "personal_data.*",
+                  "q.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "y:*",
+                  "external:*",
+                  "y:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          },
+          {
+            "name": "a_seq",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          },
+          {
+            "name": "a_seq 2",
+            "requestable": true,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [],
+                "persistent": false
+              },
+              {
+                "action": "upload_file",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          },
+          {
+            "name": "b_seq",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*",
+                  "q.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*",
+                  "y:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ],
+        "label_domain": [
+          "q.*",
+          "personal_data.*",
+          "q.*"
+        ]
+      },
+      "policy_digest": "sha256:4ecd212e31475eabbc311b30d458912fdfd9a2aa13c179baaddf81238bb16e44"
+    },
+    {
+      "id": "D2",
+      "title": "Sets are sorted by their UTF-8 bytes (U+E000 before U+1F600), not by UTF-16 code units",
+      "policy": {
+        "restricted_sequences": [
+          {
+            "name": "read_personal_send_external",
+            "requestable": false,
+            "steps": [
+              {
+                "action": "read_record",
+                "resources": [],
+                "result_classes": [
+                  "personal_data.*"
+                ],
+                "persistent": false
+              },
+              {
+                "action": "send_message",
+                "resources": [
+                  "external:*"
+                ],
+                "result_classes": [],
+                "persistent": false
+              }
+            ]
+          }
+        ],
+        "label_domain": [
+          "\ud83d\ude00.y",
+          "\ue000.x",
+          "caf\u00e9.*",
+          "personal_data.*"
+        ]
+      },
+      "policy_digest": "sha256:028e1c41ced6f811c83188ccb3f8bcd43ea003f260000c3f7e289097471c4e5f"
+    }
+  ]
+}

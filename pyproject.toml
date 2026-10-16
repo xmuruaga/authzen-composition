@@ -1,0 +1,61 @@
+[project]
+name = "authzen-composition"
+version = "0.1.0"
+description = "Reference implementation of the AuthZEN Mission Composition Profile: a composition predicate, result classes, and a mission-wide admission order over the AuthZEN Authorization API 1.0."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Xabier Muruaga" }]
+keywords = ["authzen", "authorization", "ai-agents", "openid", "policy-enforcement"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Security",
+  "Typing :: Typed",
+]
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/xmuruaga/authzen-composition"
+Issues = "https://github.com/xmuruaga/authzen-composition/issues"
+Changelog = "https://github.com/xmuruaga/authzen-composition/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.4.2",
+  "pytest-cov==7.1.0",
+  "coverage==7.16.2",
+  "hypothesis==6.151.4",
+  "mypy==1.19.1",
+  "ruff==0.17.0",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["authzen_composition"]
+
+# pytest is configured in pytest.ini, coverage in .coveragerc.
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "E301", "E302", "E303", "E304", "E305", "E306", "W", "F", "I", "UP", "B", "SIM", "PIE"]
+# The blank-line rules (E301 to E306) are preview rules; enable only those named here.
+preview = true
+explicit-preview-rules = true
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true

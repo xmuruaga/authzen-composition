@@ -1,0 +1,62 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m ruff check .
+      - run: python -m mypy authzen_composition e2e
+      # Property tests derandomized, so a CI run is reproducible.
+      - run: python -m pytest --hypothesis-seed=0
+      - run: python interop/verify_vectors.py
+        env:
+          PYTHONPATH: .
+      - run: python scripts/gen_vectors.py --check
+        env:
+          PYTHONPATH: .
+
+  draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@651ff0d62c5c79bed6d53ec518387aae20e72c1a  # v1.329.0
+        with:
+          ruby-version: "3.3"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - run: gem install kramdown-rfc -v 1.7.43 --no-document
+      - run: python -m pip install -e ".[dev]" xml2rfc==3.30.0
+      - run: python -m pytest tests/test_draft_format.py --no-cov -o addopts=
+        env:
+          AZC_REQUIRE_DRAFT_BUILD: "1"
+          # References from the committed cache only.
+          KRAMDOWN_OFFLINE: "1"

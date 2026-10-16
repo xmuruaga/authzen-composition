@@ -1,0 +1,3 @@
+# Line endings are LF in the repository and in every checkout, so the
+# vectors and the rendered draft are byte-identical on every platform.
+* text=auto eol=lf
