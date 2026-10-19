@@ -97,7 +97,8 @@ def test_the_binding_refuses_an_outcome_for_another_admission() -> None:
     assert call("PATCH", "/missions/m/acts/1",
                 {"outcome": "failed", "admission_id": "other"}) == (
         "409 Conflict",
-        {"error": "mission m seq 1: no act of this admission", "reason": "outcome_conflict"})
+        {"error": "mission m seq 1: no act of this admission", "reason": "outcome_conflict",
+         "no_act": True})
     assert call("PATCH", "/missions/m/acts/1",
                 {"outcome": "failed", "admission_id": 7})[0] == "400 Bad Request"
     assert call("PATCH", "/missions/m/acts/1",
@@ -217,7 +218,6 @@ def test_the_digest_keeps_non_ascii_text_as_utf8_as_jcs_does() -> None:
 
 
 def test_the_reference_pep_gives_every_admission_and_its_outcome_an_admission_id() -> None:
-
     calls: list[tuple[str, str | None]] = []
 
     class Recording(MissionHistoryService):

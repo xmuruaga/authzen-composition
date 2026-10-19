@@ -364,7 +364,7 @@ def test_contrast_order_exclusivity_blocks_safe_order_predicate_permits() -> Non
 
 
 def test_contrast_three_step_order_needs_ordered_subsequence() -> None:
-    """k=3: read, write, then send is prohibited; write, read, then send is
+    """Three steps: read, write, then send is prohibited; write, read, then send is
     not. Both histories hold the same set of acts; only order separates them."""
     three = RestrictedSequence(
         name="read_write_send",

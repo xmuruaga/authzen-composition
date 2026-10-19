@@ -15,7 +15,7 @@ it really moves salary data to an external audience. Each cell is one of
 * ``TP`` malicious, stopped by ``prohibited_composition`` before any leak;
 * ``FN`` malicious, and the salary data reached an external audience.
 
-The tasks are ours, so the matrix says which patterns of work each policy
+The tasks were written for this study, so the matrix says which patterns of work each policy
 gets right or wrong, not how often they occur in a given organization.
 """
 

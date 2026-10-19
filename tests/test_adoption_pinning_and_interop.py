@@ -24,7 +24,9 @@ from authzen_composition.http_binding import MHSHttpApp, StaticTokenAuthenticato
 from authzen_composition.mhs import (
     HistoryUnavailable,
     MissionHistoryService,
+    NoActAtPosition,
     NotPermitted,
+    OutcomeAlreadySet,
     UnauthenticatedWriter,
 )
 from authzen_composition.model import (
@@ -408,7 +410,6 @@ DEVIANTS = {
 @pytest.mark.parametrize("name", sorted(DEVIANTS))
 def test_vectors_catch_a_deviant_implementation(name: str,
                                                 monkeypatch: pytest.MonkeyPatch) -> None:
-
     target, attr, value = DEVIANTS[name]
     monkeypatch.setattr(vv if target is None else target, attr, value)
     data = json.loads(ROOT_VECTORS.read_text(encoding="utf-8"))
@@ -461,7 +462,6 @@ def test_an_act_that_needs_no_obligation_needs_no_adoption() -> None:
 
 
 def test_the_reference_pep_adopts_obligations_and_lists_mission_record() -> None:
-
     seen: list[EvaluationRequest] = []
 
     class Recorder:
@@ -537,7 +537,6 @@ def test_an_id_that_is_not_utf8_is_a_bad_request_not_a_guess() -> None:
 ])
 def test_a_permit_with_an_obligation_the_pep_does_not_know_is_a_deny(
         obligations: tuple[Obligation, ...]) -> None:
-
     class PDP:
         def evaluate(self, request: EvaluationRequest) -> Decision:
             return Decision(decision=True, obligations=obligations)
@@ -581,7 +580,6 @@ def test_an_outcome_refused_for_good_is_not_redelivered_forever() -> None:
 
 
 def test_an_outcome_refused_over_http_is_not_redelivered_forever() -> None:
-
     mhs = MissionHistoryService(operators=frozenset({"ops"}))
     app = MHSHttpApp(mhs, StaticTokenAuthenticator(TOKENS), pdps=frozenset({"pdp"}))
     with _serve(app) as url:
@@ -595,7 +593,6 @@ def test_an_outcome_refused_over_http_is_not_redelivered_forever() -> None:
 
 
 def test_a_transient_outcome_failure_is_still_kept() -> None:
-
     class Down(MissionHistoryService):
         def set_outcome(self, *a: Any, **k: Any) -> Act:
             raise ConnectionError("authority unreachable")
@@ -682,7 +679,6 @@ def _decide(pdp: CompositionPDP, mission: str, action: str = "share_public",
 
 
 def test_a_designated_set_binds_a_new_mission_whichever_pdp_reads_first() -> None:
-
     mhs = MissionHistoryService(new_mission_policies=frozenset({_NEW_SET.digest}))
     old, new = CompositionPDP(_OLD_SET, mhs), CompositionPDP(_NEW_SET, mhs)
     # The old replica happens to decide first: refused, and nothing is pinned.
@@ -694,7 +690,6 @@ def test_a_designated_set_binds_a_new_mission_whichever_pdp_reads_first() -> Non
 
 
 def test_a_designation_never_moves_a_pin() -> None:
-
     mhs = MissionHistoryService()
     old, new = CompositionPDP(_OLD_SET, mhs), CompositionPDP(_NEW_SET, mhs)
     assert _decide(old, "before")[0]               # no designation: first read pins
@@ -708,7 +703,6 @@ def test_a_designation_never_moves_a_pin() -> None:
 
 
 def test_an_empty_designation_starts_no_mission_and_still_serves_audit_reads() -> None:
-
     mhs = MissionHistoryService(new_mission_policies=frozenset())
     assert _decide(CompositionPDP(_NEW_SET, mhs), "m") == (False, REASON_POLICY_MISMATCH)
     assert mhs.policy_of("m") is None
@@ -781,7 +775,6 @@ def test_the_digest_lists_several_sequences_by_their_canonical_text() -> None:
 ])
 def test_the_vector_verifier_rejects_a_mistyped_policy(path: tuple[object, ...],
                                                        value: object) -> None:
-
     data = json.loads(ROOT_VECTORS.read_text(encoding="utf-8"))
     sequence = copy.deepcopy(data["scenarios"][0]["policy"]["restricted_sequences"][0])
     target: Any = sequence
@@ -844,7 +837,6 @@ def test_an_approval_is_bound_to_the_adoption_declarations_as_the_pdp_reads_them
 ])
 def test_a_mission_record_the_pep_cannot_comply_with_is_a_deny(
         obligations: tuple[Obligation, ...]) -> None:
-
     class PDP:
         def evaluate(self, request: EvaluationRequest) -> Decision:
             return Decision(decision=True, obligations=obligations)
@@ -867,7 +859,6 @@ def test_a_mission_record_the_pep_cannot_comply_with_is_a_deny(
     {"id": "o1"},
 ])
 def test_a_malformed_obligations_member_is_not_a_decision(obligations: Any) -> None:
-
     with pytest.raises(RemoteUnavailable):
         decision_from_json({"decision": True, "context": {"obligations": obligations}})
 
@@ -909,13 +900,22 @@ def test_an_authenticated_caller_without_the_role_gets_403_and_no_credential_get
 
 
 def test_the_http_client_reads_403_as_not_permitted() -> None:
-
     client = RemoteHistoryAuthority("http://ha.invalid", "t")
     with pytest.raises(NotPermitted):
         client._raise_for(403, {"error": "no"})
     with pytest.raises(UnauthenticatedWriter) as exc:
         client._raise_for(401, {"error": "no"})
     assert not isinstance(exc.value, NotPermitted)
+    # A position that holds no Act is told apart from the other outcome
+    # conflicts, so that a PEP can recognize the refusal of the failed of an
+    # admission it gave up on.
+    with pytest.raises(NoActAtPosition):
+        client._raise_for(409, {"error": "no act", "reason": "outcome_conflict", "no_act": True})
+    for body in ({"error": "set", "reason": "outcome_conflict"},
+                 {"error": "set", "reason": "outcome_conflict", "no_act": "yes"}):
+        with pytest.raises(OutcomeAlreadySet) as conflict:
+            client._raise_for(409, body)
+        assert not isinstance(conflict.value, NoActAtPosition)
 
 
 @pytest.mark.parametrize(("exc", "final"), [
@@ -925,7 +925,6 @@ def test_the_http_client_reads_403_as_not_permitted() -> None:
 ])
 def test_a_permanent_refusal_is_final_and_a_credential_failure_is_retried(exc: str,
                                                                           final: bool) -> None:
-
     errors = {"value": ValueError("a result class must not contain '*'"),
               "not_permitted": NotPermitted("only 'pep.mail' may set this outcome"),
               "unauthenticated": UnauthenticatedWriter("authentication is required")}

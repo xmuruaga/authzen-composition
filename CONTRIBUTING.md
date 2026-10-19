@@ -11,7 +11,14 @@ interoperability are welcome.
   issue or a pull request here.
 - **A question for the AuthZEN Working Group** (how this profile should fit with
   its specifications): the group's
-  [mailing list](https://lists.openid.net/mailman/listinfo/openid-specs-authzen).
+  [mailing list](https://lists.openid.net/mailman/listinfo/openid-specs-authzen)
+  (taking part in the group requires the OpenID Foundation IPR Contribution
+  Agreement).
+- **Text for the draft:** contributions are accepted under Apache-2.0. The draft
+  may be contributed to the AuthZEN Working Group, so if you propose draft text,
+  please have signed the OpenID Foundation IPR Contribution Agreement
+  (https://openid.net/intellectual-property/), or the text may need rewriting
+  before then.
 - **A suspected vulnerability:** report it privately; see `SECURITY.md`.
 
 Everyone taking part is expected to follow the `CODE_OF_CONDUCT.md`

@@ -2,8 +2,8 @@
 
 Relabeling: a class pattern on a step after the originating read is missed
 when an intermediate operation honestly reclassifies its output with a
-recognized class. The profile now says to key only the originating step on a
-result class ({{patterns}}, Where to put class patterns). These tests pin both
+recognized class. The profile says to key only the originating step on a
+result class (Step patterns, Where to put class patterns). These tests pin both
 halves: the fragile shape is a documented limitation, the recommended shape
 blocks the same flow.
 

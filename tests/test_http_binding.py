@@ -113,9 +113,8 @@ def test_method_not_allowed() -> None:
     assert r["status"].startswith("405")
 
 
-def test_empty_body_is_empty_dict() -> None:
+def test_a_get_without_content_length_is_read() -> None:
     a = app()
-    # GET with no content length path
     environ = {
         "REQUEST_METHOD": "GET",
         "PATH_INFO": "/missions/m1/acts",
@@ -136,7 +135,7 @@ def test_patch_missing_outcome_is_bad_request() -> None:
     assert r["status"].startswith("400")
 
 
-def test_malformed_content_length_treated_as_empty() -> None:
+def test_malformed_content_length_is_a_bad_request() -> None:
     a = app()
     environ = {
         "REQUEST_METHOD": "POST",
@@ -147,9 +146,8 @@ def test_malformed_content_length_treated_as_empty() -> None:
     }
     captured = {}
     chunks = a(environ, lambda s, h: captured.update(status=s))
-    # empty body -> KeyError on seq -> 400
     assert captured["status"].startswith("400")
-    assert b"".join(chunks)
+    assert json.loads(b"".join(chunks))["error"] == "invalid Content-Length"
 
 
 def test_zero_content_length_post_is_empty_body() -> None:
@@ -163,7 +161,7 @@ def test_zero_content_length_post_is_empty_body() -> None:
     }
     captured = {}
     a(environ, lambda s, h: captured.update(status=s))
-    assert captured["status"].startswith("400")  # missing seq
+    assert captured["status"].startswith("400")  # an empty body is not a JSON object
 
 
 def _raw(app, method, path, auth, body=None):

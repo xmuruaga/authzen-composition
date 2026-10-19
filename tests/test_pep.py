@@ -39,7 +39,7 @@ def _enforce(pep: ReferencePEP, action: str, resource: str, perform=lambda: "ok"
 def test_pep_records_and_sets_completed_with_classes() -> None:
     pdp, mhs = build()
     pep = ReferencePEP(pdp, mhs, "pep.hr",
-                  classifier=lambda a, r, raw: frozenset({"personal_data.salary"}))
+                       classifier=lambda a, r, raw: frozenset({"personal_data.salary"}))
     _enforce(pep, "read_record", "hr:1")
     act = mhs.history("m1")[0]
     assert act.outcome is ActOutcome.COMPLETED
@@ -77,6 +77,89 @@ def test_pep_leaves_open_on_unknown_failure() -> None:
     with pytest.raises(RuntimeError):
         _enforce(pep, "read_record", "hr:1", perform=boom)
     assert mhs.history("m1")[0].outcome is ActOutcome.OPEN
+
+
+@pytest.mark.parametrize("failure, outcome", [
+    (TimeoutError("no answer"), ActOutcome.OPEN),
+    (NotPerformed("refused before acting"), ActOutcome.FAILED),
+])
+def test_pep_makes_one_call_per_admission_whatever_came_of_it(
+        failure: Exception, outcome: ActOutcome) -> None:
+    # Profile, PEP rules: a PEP does not send the call of an Act again under
+    # its admission, after a timeout (the effect may have happened) or after it
+    # recorded the Act failed (a later effect would hide behind the failed). The
+    # reference PEP makes exactly one call per admission and leaves a repeat to
+    # a new evaluation, a new Act at a new position.
+    pdp, mhs = build()
+    pep = ReferencePEP(pdp, mhs, "pep.hr")
+    calls: list[int] = []
+
+    def call() -> object:
+        calls.append(1)
+        raise failure
+
+    with pytest.raises(type(failure)):
+        pep.enforce(mission_id="m1", mission_issuer="iss", subject=S,
+                    action=Action("read_record"), resource=Resource("r", "hr:1"),
+                    perform=call, context={"approval": {"id": "apr_x"}})
+    assert len(calls) == 1
+    assert [a.outcome for a in mhs.history("m1")] == [outcome]
+
+
+class _AdmissionsInTransit:
+    """A History Authority whose admissions never answer: each may or may not
+    arrive later. Everything else goes to the real authority."""
+
+    def __init__(self, inner: MissionHistoryService) -> None:
+        self.inner = inner
+
+    def admit(self, *args: object, **kwargs: object) -> object:
+        raise TimeoutError("no acknowledgement")
+
+    def __getattr__(self, name: str) -> object:
+        return getattr(self.inner, name)
+
+
+def test_the_failed_of_an_admission_given_up_before_it_committed_is_no_incident() -> None:
+    # Rule 3: with no acknowledgement the PEP gives up and resolves the
+    # admission failed. Where the admission never committed, the authority
+    # refuses that failed for want of an Act, which is expected, not an
+    # incident (profile, PEP rules). Should the admission land only after
+    # that, it takes its position and stays open, at the top, holding back its
+    # sequences until an operator closes it (Security considerations, Open Acts).
+    pdp, mhs = build()
+    pep = ReferencePEP(pdp, _AdmissionsInTransit(mhs), "pep.hr")  # type: ignore[arg-type]
+    with pytest.raises(CompositionDenied):
+        _enforce(pep, "read_record", "hr:1")
+    (mission, seq, outcome, _, admission_id), = pep.unreported
+    assert (mission, seq, outcome) == ("m1", 1, ActOutcome.FAILED)
+    pep.redeliver()
+    assert pep.unreported == [] and pep.refused == []
+    assert [entry[:3] for entry in pep.abandoned] == [("m1", 1, admission_id)]
+    # The delayed admission lands now: an open Act nobody will report on.
+    mhs.admit("m1", 1, "read_record", "hr:1", writer="pep.hr", admission_id=admission_id)
+    write = EvaluationRequest(S, Action("write_document"), Resource("r", "doc:1"),
+                              mission=Mission("m1", ISSUER),
+                              supported_mandatory_extensions=("obligations",),
+                              supported_obligations=("mission_record",))
+    assert pdp.evaluate(write).reason == "history_pending"
+
+
+@pytest.mark.parametrize("writer", ["pep.hr", "pep.other"])
+def test_the_failed_of_a_given_up_admission_whose_position_was_taken_is_no_incident(
+        writer: str) -> None:
+    # As above, but before the failed is delivered the position is admitted
+    # under another admission, of this PEP or of another writer: no Act of the
+    # admission the PEP gave up on holds it, so the refusal is no incident.
+    pdp, mhs = build()
+    pep = ReferencePEP(pdp, _AdmissionsInTransit(mhs), "pep.hr")  # type: ignore[arg-type]
+    with pytest.raises(CompositionDenied):
+        _enforce(pep, "read_record", "hr:1")
+    (_, _, _, _, admission_id), = pep.unreported
+    mhs.admit("m1", 1, "read_record", "hr:2", writer=writer, admission_id="another")
+    pep.redeliver()
+    assert pep.unreported == [] and pep.refused == []
+    assert [entry[:3] for entry in pep.abandoned] == [("m1", 1, admission_id)]
 
 
 def test_pep_retries_on_conflict_then_succeeds() -> None:

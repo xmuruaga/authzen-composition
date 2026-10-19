@@ -448,7 +448,6 @@ def test_pep_pdp_and_mhs_over_http_deny_the_composition_and_honour_an_approval()
 
 
 def test_pdp_http_routes_and_authentication() -> None:
-
     with deployment(access_request_endpoint=None) as env:
         base = env["pdp_url"]
 
@@ -500,7 +499,6 @@ def test_remote_pdp_failures_never_let_the_pep_act() -> None:
 
 
 def test_mhs_conflict_bodies_carry_a_machine_readable_reason() -> None:
-
     with mhs_server() as (url, _):
         def post(path: str, method: str, body: dict[str, Any]) -> dict[str, Any]:
             req = urllib.request.Request(url + path, method=method,
@@ -515,8 +513,13 @@ def test_mhs_conflict_bodies_carry_a_machine_readable_reason() -> None:
         act = {"seq": 1, "action": {"name": "a"}, "resource": {"id": "r"}}
         post("/missions/m1/acts", "POST", act)
         assert post("/missions/m1/acts", "POST", act)["reason"] == "seq_conflict"
-        assert post("/missions/m1/acts/9", "PATCH",
-                    {"outcome": "completed"})["reason"] == "outcome_conflict"
+        # A position with no Act of the admission named is an outcome
+        # conflict, flagged no_act.
+        assert post("/missions/m1/acts/9", "PATCH", {"outcome": "completed"}) == {
+            "error": "mission m1: no act at seq 9", "reason": "outcome_conflict", "no_act": True}
+        post("/missions/m1/acts/1", "PATCH", {"outcome": "completed"})
+        conflict = post("/missions/m1/acts/1", "PATCH", {"outcome": "failed"})
+        assert conflict["reason"] == "outcome_conflict" and "no_act" not in conflict
 
 
 def test_redeliver_from_many_threads_delivers_each_outcome_once() -> None:
@@ -672,7 +675,6 @@ def test_reading_a_decision_does_not_change_the_body() -> None:
 
 
 def test_pdp_http_answer_bodies_and_media_type() -> None:
-
     with deployment() as env:
         base = env["pdp_url"]
 
@@ -966,6 +968,25 @@ def test_no_read_or_write_starts_once_the_exchange_time_is_spent() -> None:
             spent.readinto(bytearray(1))
         with pytest.raises(TimeoutError):
             spent.sendall(b"x")
+
+
+def test_a_valid_answer_nested_too_deeply_is_unavailable_on_every_platform() -> None:
+    # Valid JSON a parser on a large stack would accept: the depth is checked
+    # before parsing, so the answer is the same on every platform.
+    deep = remote.MAX_ANSWER_DEPTH
+    pdp_answer = b'{"decision": true, "context": ' + b'{"a": ' * deep + b"1" + b"}" * (deep + 1)
+    history_answer = b'{"acts": [' + b"[" * deep + b"]" * deep + b"]}"
+    with (serve(canned("200 OK", pdp_answer)) as url,
+          pytest.raises(RemoteUnavailable, match="nested too deeply")):
+        RemotePDP(url, "t", timeout=5.0).evaluate(REQ)
+    with serve(canned("200 OK", history_answer)) as url, pytest.raises(HistoryUnavailable):
+        RemoteHistoryAuthority(url, "t", timeout=5.0).history("m")
+
+
+def test_an_answer_that_is_not_utf8_is_unavailable() -> None:
+    with (serve(canned("200 OK", b'{"decision": true, "x": "\xff"}')) as url,
+          pytest.raises(RemoteUnavailable, match="unreadable body")):
+        RemotePDP(url, "t", timeout=5.0).evaluate(REQ)
 
 
 def test_an_answer_nested_too_deeply_to_read_is_unavailable() -> None:

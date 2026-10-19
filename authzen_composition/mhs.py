@@ -54,7 +54,15 @@ class HistoryConflict(Exception):
 
 
 class UnknownAct(Exception):
-    """Raised when an outcome is reported for a position that does not exist."""
+    """Raised when an outcome is reported for a position that does not exist,
+    or for an Act admitted under another ``admission_id``."""
+
+
+class NoActAtPosition(UnknownAct):
+    """Raised when an outcome is reported for a position that holds no Act of
+    the admission it names: no Act at all, or another admission's. For the
+    ``failed`` of an admission its PEP gave up on, that refusal is expected
+    and not an incident (profile, PEP rules)."""
 
 
 class OutcomeAlreadySet(Exception):
@@ -93,6 +101,10 @@ class _Record:
     act: Act
     recorded_by: str
     admission_id: str | None = None
+    # The operator that closed the Act, for audit (profile, Security
+    # considerations, Accountability). Kept beside the Act, never in it: the
+    # predicate reads the Act, and a close says nothing of what happened.
+    closed_by: str | None = None
 
 
 class MissionHistoryService:
@@ -230,19 +242,23 @@ class MissionHistoryService:
         with self._lock:
             records = self._missions.get(mission_id, [])
             if seq < 1 or seq > len(records):
-                raise UnknownAct(f"mission {mission_id}: no act at seq {seq}")
+                raise NoActAtPosition(f"mission {mission_id}: no act at seq {seq}")
             record = records[seq - 1]
+            if record.admission_id is not None and admission_id != record.admission_id:
+                # The outcome belongs to another admission: one that never
+                # committed (its PEP gave up), or one this authority lost and
+                # whose position it reused, even for the same writer. Applying
+                # it would record another Act's outcome on this one. Checked
+                # before the writer, so that a PEP whose given-up admission's
+                # position another writer took learns only that its own
+                # admission is not there.
+                raise NoActAtPosition(
+                    f"mission {mission_id} seq {seq}: no act of this admission"
+                )
             if record.recorded_by != writer:
                 raise NotPermitted(
                     f"mission {mission_id} seq {seq}: only the writer that "
                     "admitted this act may set its outcome"
-                )
-            if record.admission_id is not None and admission_id != record.admission_id:
-                # The outcome belongs to another admission: one this authority
-                # lost and whose position it reused, even for the same writer.
-                # Applying it would record another Act's outcome on this one.
-                raise UnknownAct(
-                    f"mission {mission_id} seq {seq}: no act of this admission"
                 )
             if record.act.outcome is not ActOutcome.OPEN:
                 if (
@@ -287,6 +303,7 @@ class MissionHistoryService:
                 raise OutcomeAlreadySet(f"mission {mission_id} seq {seq}: outcome already set")
             record.act = Act(seq=seq, action=record.act.action, resource=record.act.resource,
                              outcome=ActOutcome.COMPLETED)
+            record.closed_by = operator
             return record.act
 
     def designate(self, policies: frozenset[str] | None) -> None:
@@ -338,3 +355,14 @@ class MissionHistoryService:
             if seq < 1 or seq > len(records):
                 raise UnknownAct(f"mission {mission_id}: no act at seq {seq}")
             return records[seq - 1].recorded_by
+
+    def closed_by(self, mission_id: str, seq: int) -> str | None:
+        """For audit: the operator that closed the Act, or None if it was not
+        closed by one. Its `completed` then says that the effect can no
+        longer start or still be in progress, not that it happened (profile,
+        History Authority, item 7)."""
+        with self._lock:
+            records = self._missions.get(mission_id, [])
+            if seq < 1 or seq > len(records):
+                raise UnknownAct(f"mission {mission_id}: no act at seq {seq}")
+            return records[seq - 1].closed_by

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
+import threading
+from typing import Any
+
 import pytest
 
 from authzen_composition.mhs import (
@@ -15,6 +19,46 @@ from authzen_composition.mhs import (
     UnknownAct,
 )
 from authzen_composition.model import ActOutcome
+
+
+def test_two_writers_that_read_the_next_position_at_once_are_not_both_admitted() -> None:
+    # History Authority item 2: admission is one linearizable step per
+    # Mission. Two writers that both look up the Mission before either
+    # appends must not both be admitted at position 1. The lookup waits for
+    # the other writer to look up too, which makes the race certain where the
+    # check and the append are separate steps: then both are acknowledged and
+    # one record is lost. Under one step the second writer cannot look up
+    # until the first has appended, the wait times out, and it conflicts.
+    mhs = MissionHistoryService()
+    barrier = threading.Barrier(2, timeout=0.5)
+    lookups: list[str] = []
+
+    class Rendezvous(dict[str, Any]):
+        def get(self, key: str, default: Any = None) -> Any:
+            value = super().get(key, default)
+            lookups.append(key)
+            with contextlib.suppress(threading.BrokenBarrierError):
+                barrier.wait()
+            return value
+
+    mhs._missions = Rendezvous()
+    results: list[object] = []
+
+    def admit(writer: str) -> None:
+        try:
+            results.append(mhs.admit("m", 1, "read", "r", writer=writer))
+        except HistoryConflict as exc:
+            results.append(exc)
+
+    threads = [threading.Thread(target=admit, args=(w,)) for w in ("pep.a", "pep.b")]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=5)
+    # Both writers looked the Mission up, so the race was attempted.
+    assert lookups == ["m", "m"]
+    assert sorted(type(r).__name__ for r in results) == ["Act", "HistoryConflict"]
+    assert [a.seq for a in mhs.history("m")] == [1]
 
 
 def test_admit_requires_next_position() -> None:

@@ -11,6 +11,7 @@ import json
 import threading
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta, timezone
 from typing import Any
 
@@ -153,6 +154,99 @@ def test_an_approval_for_a_non_requestable_denial_is_told_to_stop() -> None:
     assert denied.context["next_action"] == "none"
 
 
+def test_the_approver_is_shown_the_earlier_attempts_at_the_target() -> None:
+    # Profile, Approvals, "What the approver sees": an earlier send to the same
+    # target whose outcome is unknown (its PEP timed out) is shown first, a
+    # completed one after it; a failed one, which had no effect, and Acts on
+    # other targets are not. The send repeated now completes the sequence
+    # again, so it needs a new approval, and approving it does not resolve the
+    # open attempt.
+    pdp, ars, _ = _setup()
+    mhs = pdp.mhs
+    mhs.admit("m", 3, "send_message", "external:press", writer="pep")
+    mhs.set_outcome("m", 3, ActOutcome.COMPLETED, writer="pep")
+    mhs.admit("m", 4, "send_message", "external:press", writer="pep")
+    mhs.set_outcome("m", 4, ActOutcome.FAILED, writer="pep")
+    mhs.admit("m", 5, "send_message", "external:press", writer="pep")
+    mhs.admit("m", 6, "send_message", "external:other", writer="pep")
+    mhs.set_outcome("m", 6, ActOutcome.COMPLETED, writer="pep")
+    request, decision = _denied(pdp)
+    _, answer = ars.submit("pep.mail", _submission(request, decision))
+    task = answer["task"]["id"]
+    shown = ars.review("alice", task)
+    assert shown["task"]["status"] == "pending"
+    assert shown["request"] == {"subject": {"type": "agent", "id": "agent-7"},
+                                "action": {"name": "send_message"},
+                                "resource": {"type": "recipient", "id": "external:press"}}
+    assert shown["sequences"] == ["read_personal_write_send_external"]
+    assert shown["earlier"] == [
+        {"seq": 5, "action": "send_message", "outcome": "open", "result_classes": []},
+        {"seq": 3, "action": "send_message", "outcome": "completed", "result_classes": []},
+    ]
+    # The delegation chain is shown, and its actors cannot see or decide.
+    _, delegated = ars.submit("pep.mail", _submission(*_denied(pdp, _send(act="sub-1"))))
+    assert ars.review("alice", delegated["task"]["id"])["actors"] == ["sub-1"]
+    with pytest.raises(NotAuthorized):
+        ars.review("agent-7", task)
+    with pytest.raises(AccessRequestError) as unknown:
+        ars.review("alice", "arq_nope")
+    assert unknown.value.kind == "unknown_task"
+    # Never the task's result: the approval goes to its requester only.
+    ars.decide("alice", task, approve=True)
+    assert set(ars.review("alice", task)) == {"task"} | set(shown) - {"task"}
+    approval = AccessRequestClient.approval(ars.status("pep.mail", task))
+    assert pdp.evaluate(_send(approval=approval)).decision
+    # Once the denial is spent, only the task is left to show.
+    assert set(ars.review("alice", task)) == {"task"}
+    # What is shown is a copy: editing it changes no binding.
+    _, other = ars.submit("pep.mail", _submission(*_denied(pdp)))
+    view = ars.review("alice", other["task"]["id"])
+    view["request"]["resource"]["id"] = "external:other"
+    view["earlier"][0]["result_classes"].append("x")
+    assert ars.review("alice", other["task"]["id"])["request"]["resource"]["id"] == "external:press"
+
+
+def test_the_approver_sees_every_action_at_the_target_as_read_at_the_denial() -> None:
+    # Profile, Approvals, "What the approver sees": every Act at the target,
+    # whatever its action, with its result classes, as the history read for
+    # the denial held them, not as it holds them later.
+    pdp, ars, _ = _setup()
+    mhs = pdp.mhs
+    mhs.admit("m", 3, "send_message", "external:press", writer="pep")
+    mhs.set_outcome("m", 3, ActOutcome.COMPLETED, writer="pep",
+                    result_classes=frozenset({"delivery.receipt"}))
+    mhs.admit("m", 4, "lookup_recipient", "external:press", writer="pep")
+    mhs.set_outcome("m", 4, ActOutcome.COMPLETED, writer="pep")
+    request, decision = _denied(pdp)
+    task = ars.submit("pep.mail", _submission(request, decision))[1]["task"]["id"]
+    expected = [
+        {"seq": 3, "action": "send_message", "outcome": "completed",
+         "result_classes": ["delivery.receipt"]},
+        {"seq": 4, "action": "lookup_recipient", "outcome": "completed", "result_classes": []},
+    ]
+    assert ars.review("alice", task)["earlier"] == expected
+    mhs.admit("m", 5, "send_message", "external:press", writer="pep")
+    assert ars.review("alice", task)["earlier"] == expected
+
+
+def test_a_plain_deny_to_a_pep_that_did_not_opt_in_still_says_stop() -> None:
+    # Check (d): a Step-matching Act whose PEP has not opted in to
+    # mission_record gets a plain deny, with no reason and no obligation. When
+    # the request presented an approval, ARAP still has the PDP tell the PEP
+    # what to do next, and no approval can lead to a permit here.
+    pdp, _, _ = _setup()
+    request = EvaluationRequest(
+        Subject("agent", "agent-7"), Action("write_document"), Resource("document", "doc:2"),
+        mission=Mission("m", ISSUER), context={"approval": {"id": "apr_x"}})
+    denied = pdp.evaluate(request)
+    assert not denied.decision and denied.reason is None and denied.obligations == ()
+    assert denied.access_request is None
+    assert denied.context["next_action"] == "none"
+    # Without an approval the plain deny carries nothing at all.
+    bare = pdp.evaluate(replace(request, context={}))
+    assert not bare.decision and bare.reason is None and "next_action" not in bare.context
+
+
 # --- Process a Submission ----------------------------------------------------
 
 @pytest.mark.parametrize("change, kind", [
@@ -160,6 +254,9 @@ def test_an_approval_for_a_non_requestable_denial_is_told_to_stop() -> None:
     (lambda b: b["denial"].pop("evaluation_id"), "invalid_denial_binding"),
     (lambda b: b["denial"].update(evaluation_id=None, binding_token="x.y.z"),
      "invalid_denial_binding"),
+    # A binding_token is the authoritative binding when present: the service
+    # never falls back to a valid evaluation_id beside one it cannot verify.
+    (lambda b: b["denial"].update(binding_token="x.y.z"), "invalid_denial_binding"),
     (lambda b: b["denial"].pop("expires_at"), "invalid_denial_binding"),
     (lambda b: b["denial"].update(evaluation_id="eval_never_issued"), "not_requestable"),
     (lambda b: b["resource"].update(id="external:other"), "invalid_denial_binding"),
@@ -168,7 +265,7 @@ def test_an_approval_for_a_non_requestable_denial_is_told_to_stop() -> None:
     (lambda b: b["action"].update(properties={"x": 1}), "invalid_denial_binding"),
     (lambda b: b["context"]["mission"].update(id="m2"), "invalid_denial_binding"),
     (lambda b: b["context"].pop("mission"), "invalid_denial_binding"),
-    # The adoption declarations are authorization-relevant Context too.
+    # The adoption declarations are bound too, as capability declarations.
     (lambda b: b["context"].update(supported_obligations=[]), "invalid_denial_binding"),
     (lambda b: b["context"].pop("supported_mandatory_extensions"), "invalid_denial_binding"),
     (lambda b: b["context"].update(supported_mandatory_extensions=["obligations", "x"]),
@@ -636,6 +733,30 @@ def test_no_actor_in_the_delegation_chain_approves() -> None:
             ars.decide("alice", task, approve=True)
 
 
+def test_the_agent_is_barred_from_approving_wherever_the_request_carries_it() -> None:
+    # Profile, Approvals (who approves): the subject, and the current actor
+    # where the request carries one, MUST NOT approve, and no earlier actor of
+    # the chain SHOULD. Here the actor is carried as the mission-bound drafts
+    # do, in context.actor with an `act` array, under a person as the subject.
+    pdp, _, clock = _setup()
+    ars = AccessRequestService(pdp, submitters=frozenset({"pep.mail"}), clock=clock,
+                               approvers=frozenset({"user_1", "agent-x", "root-app", "bob"}))
+    request = EvaluationRequest(
+        Subject("user", "user_1"), Action("send_message"), Resource("recipient", "external:press"),
+        mission=Mission("m", ISSUER), supported_mandatory_extensions=("obligations",),
+        supported_obligations=("mission_record",),
+        context={"actor": {"client_id": "agent-x", "client_instance_id": "inst-1",
+                           "act": [{"client_id": "root-app"}, {"client_id": "agent-x"}]}})
+    task = ars.submit("pep.mail", _submission(*_denied(pdp, request)))[1]["task"]["id"]
+    for barred in ("user_1", "agent-x", "root-app"):
+        with pytest.raises(NotAuthorized):
+            ars.review(barred, task)
+        with pytest.raises(NotAuthorized):
+            ars.decide(barred, task, approve=True)
+    assert ars.review("bob", task)["actors"] == ["agent-x", "root-app"]
+    assert ars.decide("bob", task, approve=True)["task"]["status"] == "approved"
+
+
 def test_published_times_are_the_enforced_ones_whatever_the_clock_s_zone() -> None:
     # The second is taken in UTC, the zone the times are published in.
     pdp, ars, clock = _setup()
@@ -704,6 +825,11 @@ def test_the_routes_over_http() -> None:
     assert _http(app, "GET", f"{REQUESTS_PATH}/{task}", None)[0].startswith("401")
 
     decide = f"/approvals/v1/tasks/{task}"
+    assert _http(app, "GET", decide, "pep")[0].startswith("401")
+    assert _http(app, "GET", decide, "self")[0] == "403 Forbidden"
+    status, _, shown = _http(app, "GET", decide, "person")
+    assert status == "200 OK" and shown["task"]["status"] == "pending"
+    assert shown["request"]["resource"]["id"] == "external:press" and shown["earlier"] == []
     assert _http(app, "POST", decide, "pep", {"decision": "approve"})[0].startswith("401")
     assert _http(app, "POST", decide, "self", {"decision": "approve"})[0] == "403 Forbidden"
     assert _http(app, "POST", decide, "person", {"decision": "maybe"})[0] == "400 Bad Request"
@@ -792,7 +918,6 @@ def test_the_client_without_a_published_endpoint() -> None:
 
 
 def test_the_client_rejects_an_answer_without_a_task_handle() -> None:
-
     client = AccessRequestClient(ENDPOINT, "pep")
     for answer in ({}, {"task": {"id": "a"}}, {"task": "a"}):
         with pytest.raises(RemoteUnavailable):

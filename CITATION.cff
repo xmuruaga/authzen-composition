@@ -9,8 +9,8 @@ type: software
 authors:
   - family-names: Muruaga
     given-names: Xabier
-version: 0.1.0
-date-released: 2026-10-16
+version: 0.2.0
+date-released: 2026-10-19
 license: Apache-2.0
 repository-code: https://github.com/xmuruaga/authzen-composition
 keywords:

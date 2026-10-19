@@ -2,8 +2,8 @@
 
 The PEP ties the pieces together exactly as the profile requires:
 
-1. it takes the mission identifier from a trusted input (here, a constructor
-   argument standing in for a verified token claim), never from the agent;
+1. it takes the mission identifier from a trusted input (here, an argument of
+   ``enforce`` standing in for a verified token claim), never from the agent;
 2. it asks the PDP;
 3. on a permit carrying a ``mission_record`` obligation, it records the act at
    the MHS at the named position *before* performing the action; a conflict
@@ -30,6 +30,7 @@ from typing import Any, Protocol
 from authzen_composition.mhs import (
     HistoryAuthority,
     HistoryConflict,
+    NoActAtPosition,
     NotPermitted,
     OutcomeAlreadySet,
     UnauthenticatedWriter,
@@ -140,6 +141,14 @@ class ReferencePEP:
     refused: list[tuple[str, int, ActOutcome, frozenset[str], str]] = field(
         default_factory=list
     )
+    # Admissions this PEP gave up on whose `failed` the authority refused for
+    # want of an Act: they never committed, which is expected and not an
+    # incident (profile, PEP rules). Should one commit later it stays open, at
+    # the conservative top, until an operator closes it (profile, Security
+    # considerations, Open Acts); kept with the authority's answer so that the
+    # operator can watch for that.
+    abandoned: list[tuple[str, int, str | None, str]] = field(default_factory=list)
+    _given_up: set[tuple[str, int, str | None]] = field(default_factory=set, repr=False)
     _unreported_lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
     # Wall clock for an approval's approved_until; injectable for tests.
     clock: Callable[[], datetime] = field(default=lambda: datetime.now(UTC), repr=False)
@@ -252,6 +261,7 @@ class ReferencePEP:
                 # sequences. Redelivery retries until the authority answers;
                 # if nothing was admitted there, the outcome is refused.
                 with self._unreported_lock:
+                    self._given_up.add((mission_id, expected_seq, admission_id))
                     self.unreported.append(
                         (mission_id, expected_seq, ActOutcome.FAILED, frozenset(),
                          admission_id))
@@ -324,11 +334,21 @@ class ReferencePEP:
         re-delivery, which the MHS accepts idempotently, unless the authority
         refused it for good (see ``refused``).
         """
+        given_up = (mission_id, seq, admission_id)
         try:
             self.mhs.set_outcome(
                 mission_id, seq, outcome, writer=self.writer_id, result_classes=classes,
                 admission_id=admission_id,
             )
+        except NoActAtPosition as exc:
+            with self._unreported_lock:
+                if given_up in self._given_up:
+                    # The admission it gave up on never committed (rule 3).
+                    self._given_up.discard(given_up)
+                    self.abandoned.append((mission_id, seq, admission_id, str(exc)))
+                else:
+                    self.refused.append((mission_id, seq, outcome, classes, str(exc)))
+            return
         except (OutcomeAlreadySet, UnknownAct, NotPermitted, ValueError) as exc:
             # A final answer: retrying cannot change it, and dropping the
             # outcome changes nothing the authority holds. It is an incident
@@ -343,6 +363,10 @@ class ReferencePEP:
         except Exception:
             with self._unreported_lock:
                 self.unreported.append((mission_id, seq, outcome, classes, admission_id))
+            return
+        # Recorded, or refused for good for another reason: no longer pending.
+        with self._unreported_lock:
+            self._given_up.discard(given_up)
 
     def redeliver(self) -> None:
         """Retry outcomes that could not be recorded (late delivery).

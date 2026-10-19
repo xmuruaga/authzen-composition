@@ -236,7 +236,6 @@ def test_a_denial_after_the_approval_check_does_not_burn_the_approval() -> None:
 
 
 def test_an_approval_cannot_be_spent_twice_concurrently() -> None:
-
     for _ in range(50):
         pdp, _, rid = _approved_send_pdp()
         barrier = threading.Barrier(8)
@@ -255,7 +254,7 @@ def test_an_approval_cannot_be_spent_twice_concurrently() -> None:
         assert results.count(True) == 1
 
 
-def test_a_spent_approval_reports_prohibited() -> None:
+def test_an_approval_is_consumed_only_once() -> None:
     pdp, _, rid = _approved_send_pdp()
     assert pdp._approved(_send_req(rid), _cand(), ("exfil",)) == rid["id"]
     assert pdp._consume(rid["id"]) is True
@@ -323,9 +322,12 @@ def test_mhs_error_messages() -> None:
          "a result class must not contain '*'"),
         (lambda: mhs.set_outcome("m", 9, ActOutcome.COMPLETED, writer="w"), UnknownAct,
          "mission m: no act at seq 9"),
-        (lambda: mhs.set_outcome("m", 1, ActOutcome.COMPLETED, writer="v"),
+        (lambda: mhs.set_outcome("m", 1, ActOutcome.COMPLETED, writer="v", admission_id="k"),
          UnauthenticatedWriter,
          "mission m seq 1: only the writer that admitted this act may set its outcome"),
+        # Another writer that names no admission of the Act learns only that.
+        (lambda: mhs.set_outcome("m", 1, ActOutcome.COMPLETED, writer="v"),
+         UnknownAct, "mission m seq 1: no act of this admission"),
         (lambda: mhs.set_outcome("m", 1, ActOutcome.COMPLETED, writer="w",
                                  admission_id="other"),
          UnknownAct, "mission m seq 1: no act of this admission"),
@@ -458,7 +460,8 @@ def test_exact_error_bodies() -> None:
     out = json.loads(b"".join(app(env, lambda s, h: got.update(s=s))))
     assert (got["s"], out) == ("401 Unauthorized", {"error": "authentication is required"})
     assert _http("PATCH", "/missions/m/acts/3", _j({"outcome": "completed"}), app=app) == (
-        "409 Conflict", {"error": "mission m: no act at seq 3", "reason": "outcome_conflict"})
+        "409 Conflict", {"error": "mission m: no act at seq 3", "reason": "outcome_conflict",
+                         "no_act": True})
     _http("POST", "/missions/m/acts", _j(GOOD), app=app)
     _http("PATCH", "/missions/m/acts/1", _j({"outcome": "completed"}), app=app)
     assert _http("PATCH", "/missions/m/acts/1", _j({"outcome": "failed"}), app=app) == (
@@ -637,8 +640,8 @@ def _unauth(method: str, path: str) -> tuple[str, dict]:
     ("PATCH", "/missions/m1/acts/1"),
 ])
 def test_unauthenticated_requests_are_401_before_routing(method: str, path: str) -> None:
-    # Without a credential the caller must not learn whether a
-    # route or a method exists, and must not get its method or path echoed.
+    # Without a credential the caller must not learn whether a route or a
+    # method exists, and must not get its method or path echoed.
     status, body = _unauth(method, path)
     assert status == "401 Unauthorized"
     assert body == {"error": "authentication is required"}

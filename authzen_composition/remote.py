@@ -29,9 +29,11 @@ from contextlib import closing
 from typing import Any
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
+from authzen_composition.http_binding import MAX_BODY_DEPTH, json_depth
 from authzen_composition.mhs import (
     HistoryConflict,
     HistoryUnavailable,
+    NoActAtPosition,
     NotPermitted,
     OutcomeAlreadySet,
     PolicyMismatch,
@@ -39,6 +41,10 @@ from authzen_composition.mhs import (
 )
 from authzen_composition.model import Act, ActOutcome
 from authzen_composition.types import Decision, EvaluationRequest, Obligation
+
+# Answers nested deeper than this are unavailable. An answer can carry a
+# request body, itself up to MAX_BODY_DEPTH deep, inside its own members.
+MAX_ANSWER_DEPTH = 2 * MAX_BODY_DEPTH
 
 
 class RemoteUnavailable(Exception):
@@ -151,8 +157,17 @@ def _call(method: str, url: str, token: str, body: dict[str, Any] | None,
     if status >= 500:
         raise RemoteUnavailable(f"{method} {url}: HTTP {status}")
     try:
-        parsed = json.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, ValueError, RecursionError) as exc:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise RemoteUnavailable(f"{method} {url}: unreadable body") from exc
+    # Checked before parsing, as the server side does: how deep the JSON
+    # parser can recurse depends on the platform's stack, and later handling
+    # (copies, digests) recurses into the answer.
+    if json_depth(text) > MAX_ANSWER_DEPTH:
+        raise RemoteUnavailable(f"{method} {url}: body nested too deeply")
+    try:
+        parsed = json.loads(text)
+    except (ValueError, RecursionError) as exc:
         raise RemoteUnavailable(f"{method} {url}: unreadable body") from exc
     if not isinstance(parsed, dict):
         raise RemoteUnavailable(f"{method} {url}: body is not a JSON object")
@@ -209,6 +224,8 @@ class RemoteHistoryAuthority:
             reason = body.get("reason")
             if reason == "seq_conflict":
                 raise HistoryConflict(error)
+            if reason == "outcome_conflict" and body.get("no_act") is True:
+                raise NoActAtPosition(error)
             if reason == "outcome_conflict":
                 raise OutcomeAlreadySet(error)
             if reason == "policy_mismatch":

@@ -361,14 +361,17 @@ def test_approval_covers_the_same_properties_in_another_member_order() -> None:
 
 def test_a_missing_opt_in_is_a_plain_deny_even_with_an_approval() -> None:
     # A PEP that has not adopted mission_record gets the plain core deny for
-    # an Act that needs it, approval or not: no reason, no obligation, and no
-    # ARAP next_action (it cannot act on any permit for this Act).
+    # an Act that needs it, approval or not: no reason and no obligation. With
+    # an approval presented, ARAP has the PDP say what to do next, and it can
+    # act on no permit for this Act, so that is `none`; next_action is ARAP's,
+    # not the Obligations Core's, so the deny stays a plain core DENY.
     mhs = MissionHistoryService()
     pdp = CompositionPDP(CompositionPolicy((RSQ,)), mhs, access_request_endpoint=ARS)
     req = replace(_req("read", "hr/1", ctx={"approval": {"id": "apr_any"}}),
                   supported_mandatory_extensions=(), supported_obligations=())
     d = pdp.evaluate(req)
-    assert (d.decision, d.reason, d.obligations, d.context) == (False, None, (), {})
+    assert (d.decision, d.reason, d.obligations, d.context) == (
+        False, None, (), {"next_action": "none"})
 
 
 # --- 6. A long Mission stays evaluable ---------------------------------------
@@ -401,8 +404,14 @@ def test_operator_closes_a_stranded_act_at_the_top_never_as_failed() -> None:
     assert _run(pdp, mhs, "read", "hr/1", finish=False)  # PEP crashed: open forever
     assert pdp.evaluate(_req("read", "hr/2")).decision  # same single step: allowed
     assert pdp.evaluate(_req("write", "d")).reason == REASON_HISTORY_PENDING
+    assert mhs.closed_by("m", 1) is None
     closed = mhs.close_stranded("m", 1, operator="ops")
     assert (closed.outcome, closed.result_classes) == (ActOutcome.COMPLETED, frozenset())
+    # The History Authority keeps who closed it, beside the Act and never in
+    # it: the Act the PDP reads is the same as a classless completion.
+    assert mhs.closed_by("m", 1) == "ops" and mhs.history("m") == [closed]
+    with pytest.raises(UnknownAct):
+        mhs.closed_by("m", 2)
     # Released from rule 5, and still counted at the top: the write may run,
     # and a send after it is a prohibited composition.
     assert _run(pdp, mhs, "write", "d")

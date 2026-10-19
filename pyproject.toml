@@ -1,7 +1,7 @@
 [project]
 name = "authzen-composition"
-version = "0.1.0"
-description = "Reference implementation of the AuthZEN Mission Composition Profile: a composition predicate, result classes, and a mission-wide admission order over the AuthZEN Authorization API 1.0."
+version = "0.2.0"
+description = "An implementation of the AuthZEN Mission Composition Profile, an individual proposal: a composition predicate, result classes, and a mission-wide admission order over the AuthZEN Authorization API 1.0."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"

@@ -177,6 +177,11 @@ class PDPHttpApp:
             if not caller:
                 return "401 Unauthorized", {"error": "authentication is required"}
             return "200 OK", ars.status(caller, task_id)
+        if prefix == TASKS_PATH and task_id and method == "GET":
+            approver = self._authenticate_approver(environ)
+            if not approver:
+                return "401 Unauthorized", {"error": "an approver credential is required"}
+            return "200 OK", ars.review(approver, task_id)
         if prefix == TASKS_PATH and task_id and method == "POST":
             approver = self._authenticate_approver(environ)
             if not approver:

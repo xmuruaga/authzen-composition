@@ -103,9 +103,11 @@ def test_binding_never_crashes_and_answers_documented_json(reqs) -> None:
         assert status in STATUSES
         assert isinstance(payload, dict)
         if status[0] in "45":
-            assert set(payload) <= {"error", "reason"} and isinstance(payload["error"], str)
+            assert set(payload) <= {"error", "reason", "no_act"}
+            assert isinstance(payload["error"], str)
             assert payload.get("reason", "seq_conflict") in {
                 "seq_conflict", "outcome_conflict", "policy_mismatch"}
+            assert payload.get("no_act", True) is True
             assert ("reason" in payload) == status.startswith("409")
         if auth != "Bearer tok":
             assert mhs.history("m1") + mhs.history("m2") == before

@@ -104,7 +104,6 @@ def test_s12_arap_requestable_denial_then_approval() -> None:
 # --- helpers -------------------------------------------------------------
 
 def _step(pep: str, action: str, resource: str, classes: tuple[str, ...] = ()):
-
     return Step(pep=pep, action=action, resource=resource, result_classes=classes)
 
 

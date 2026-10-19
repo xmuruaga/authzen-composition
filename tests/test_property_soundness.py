@@ -319,7 +319,6 @@ def test_soundness_in_effect_order_with_resource_patterns(seqs, ops) -> None:
 # persistent step may use any time at or after its act's effect.
 
 def _realized_with_persistence(effects: list[Act], seq: RestrictedSequence) -> bool:
-
     def ok(step: SequenceStep, act: Act) -> bool:
         return step_matches(step.action, step.resources, step.result_classes,
                             act.action, act.resource, act.result_classes or {_TOP},

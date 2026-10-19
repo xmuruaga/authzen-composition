@@ -220,10 +220,15 @@ class AccessRequestService:
             denial = body.get("denial")
             if not isinstance(denial, dict):
                 raise AccessRequestError("invalid_denial_binding", "denial is required")
+            if denial.get("binding_token") is not None:
+                # A binding_token, when present, is the authoritative denial
+                # binding, and evaluation_id is then not a binding form (ARAP
+                # "Denial Binding Artifacts"). This service verifies no binding
+                # artifacts, so it cannot use the submission.
+                raise AccessRequestError("invalid_denial_binding",
+                                         "denial.binding_token cannot be verified here")
             evaluation_id = denial.get("evaluation_id")
             if not isinstance(evaluation_id, str):
-                # A binding_token alone cannot be verified here (no binding
-                # artifacts): the submission has no binding this service can use.
                 raise AccessRequestError("invalid_denial_binding",
                                          "denial.evaluation_id is required")
             if not isinstance(denial.get("expires_at"), str):
@@ -281,18 +286,47 @@ class AccessRequestService:
             self._refresh(task)
             return self._answer(task)
 
+    def _for_approver(self, approver: str, task_id: str) -> _Task:
+        """The task an eligible approver may see and decide: never the
+        requester, the Subject, or an actor of its delegation chain, whether
+        carried in subject.properties.act or in context.actor (profile,
+        Approvals, who approves; ARAP "Approver Eligibility and Separation of
+        Duties" requires evaluating eligibility and leaves its rules to the
+        service's policy). Barring every earlier actor, not only the current
+        one, is stricter than the profile's SHOULD."""
+        task = self._tasks.get(task_id)
+        if task is None:
+            raise AccessRequestError("unknown_task", "unknown task")
+        if (approver not in self.approvers or approver in (task.requester, task.subject_id)
+                or approver in task.actors):
+            raise NotAuthorized("this approver is not eligible for this request")
+        self._refresh(task)
+        return task
+
+    def review(self, approver: str, task_id: str) -> dict[str, Any]:
+        """What an eligible approver is shown before deciding (profile,
+        Approvals, "What the approver sees"): the task, and, while its denial
+        can still be approved, the denied request, the actors of its
+        delegation chain, the Restricted Sequences it completes and the
+        earlier attempts at its target. Not the task's result: an approval
+        is enforceable, and only its requester retrieves it. Like ``decide``,
+        the deployment's approval interface, not part of ARAP's wire
+        protocol."""
+        with self._lock:
+            self._purge()
+            task = self._for_approver(approver, task_id)
+            shown: dict[str, Any] = {"task": self._handle(task)}
+            view = self.pdp.approver_view(task.evaluation_id)
+            if view is not None:
+                shown.update(view)
+            return shown
+
     def decide(self, approver: str, task_id: str, approve: bool) -> dict[str, Any]:
         """A person's decision in the approval workflow. Not part of ARAP's
         wire protocol: it is the deployment's approval interface."""
         with self._lock:
             self._purge()
-            task = self._tasks.get(task_id)
-            if task is None:
-                raise AccessRequestError("unknown_task", "unknown task")
-            if (approver not in self.approvers or approver in (task.requester, task.subject_id)
-                    or approver in task.actors):
-                raise NotAuthorized("this approver is not eligible for this request")
-            self._refresh(task)
+            task = self._for_approver(approver, task_id)
             if task.status != "pending":
                 raise AccessRequestError("invalid_task_state", f"the task is {task.status}")
             if not approve:

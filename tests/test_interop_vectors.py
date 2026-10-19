@@ -16,8 +16,6 @@ VECTORS = ROOT / "interop" / "test-vectors" / "composition-vectors.json"
 
 
 def test_vectors_verify() -> None:
-    sys.path.insert(0, str(ROOT))
-
     data = json.loads(VECTORS.read_text(encoding="utf-8"))
     assert run(data) == []
 
@@ -26,7 +24,6 @@ def test_vectors_are_regenerated_identically() -> None:
     # Regenerate in memory and compare with the committed file, so a stale
     # vectors file is caught in CI. The check never writes: a test that
     # rewrote the file would fail once and then pass on the next run.
-
     env = {**os.environ, "PYTHONPATH": str(ROOT)}
     before = VECTORS.read_bytes()
     check = subprocess.run(

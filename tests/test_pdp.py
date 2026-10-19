@@ -47,10 +47,10 @@ def build():
     return CompositionPDP(EXFIL_POLICY, mhs, access_request_endpoint=ARS), mhs
 
 
-def test_no_mission_is_core_passthrough() -> None:
-    # Without a Mission there is no
-    # history to read, so an Act that could fill a step is denied, not passed
-    # through; an Act no sequence restricts is still core evaluation.
+def test_without_a_mission_a_step_matching_act_is_denied() -> None:
+    # Without a Mission there is no history to read, so an Act that could fill
+    # a step is denied, not passed through; an Act no sequence restricts is
+    # still core evaluation.
     pdp, _ = build()
     denied = pdp.evaluate(_req("send_message", "external:x", mission=None))
     assert not denied.decision and denied.reason == "history_unavailable"
@@ -67,7 +67,6 @@ def test_opt_in_required_for_extending_permit() -> None:
 
 
 def test_unreachable_authority_fails_closed_with_distinct_reason() -> None:
-
     class DownMHS(MissionHistoryService):
         def history(self, mission_id: str, policy: str | None = None):  # type: ignore[override]
             raise HistoryUnavailable("authority unreachable")
@@ -78,8 +77,26 @@ def test_unreachable_authority_fails_closed_with_distinct_reason() -> None:
     assert d.reason == "history_unavailable"
 
 
-def test_requestable_denial_carries_rfc3339_expiry() -> None:
+def test_any_failure_to_read_a_history_denies_that_request_only() -> None:
+    # PDP rules: a history the PDP cannot read denies that request and does
+    # not fail the batch, whatever the read raised (here a connection error
+    # from an in-process authority, not HistoryUnavailable).
 
+    class FlakyMHS(MissionHistoryService):
+        def history(self, mission_id: str, policy: str | None = None):  # type: ignore[override]
+            if mission_id == "down":
+                raise ConnectionError("authority unreachable")
+            return super().history(mission_id, policy)
+
+    pdp = CompositionPDP(EXFIL_POLICY, FlakyMHS(), access_request_endpoint=ARS)
+    resp = pdp.evaluate_batch((_req("read_record", "hr:1", mission="down"),
+                               _req("read_record", "hr:1")))
+    assert (resp.evaluations[0].decision, resp.evaluations[0].reason) == (
+        False, "history_unavailable")
+    assert resp.evaluations[1].decision
+
+
+def test_requestable_denial_carries_rfc3339_expiry() -> None:
     pdp, mhs = build()
     mhs.admit("m1", 1, "read_record", "hr:1", writer="w")
     mhs.set_outcome("m1", 1, ActOutcome.COMPLETED, writer="w",

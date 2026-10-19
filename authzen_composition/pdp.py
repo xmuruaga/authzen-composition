@@ -20,6 +20,7 @@ the request.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import threading
@@ -29,7 +30,7 @@ from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from authzen_composition.mhs import HistoryAuthority, HistoryUnavailable, PolicyMismatch
+from authzen_composition.mhs import HistoryAuthority, PolicyMismatch
 from authzen_composition.model import Act, ActOutcome, CompositionPolicy, RestrictedSequence
 from authzen_composition.types import (
     CAPABILITY_ACCESS_REQUEST,
@@ -61,9 +62,9 @@ class _PendingApproval:
     The approval is bound to the whole denied request (subject, action and
     resource with their properties, the Mission and the adoption
     declarations), to the history position it was denied at, and to the
-    Restricted Sequences that denial completed. If any act is admitted in the meantime, or the act
-    would now complete another sequence, the approval no longer applies and
-    the PDP evaluates afresh.
+    Restricted Sequences that denial completed. If any act is admitted in
+    the meantime, or the act would now complete another sequence, the
+    approval no longer applies and the PDP evaluates afresh.
     """
 
     mission_id: str
@@ -81,6 +82,9 @@ class _PendingApproval:
     # Subject, Resource and Action as evaluated, and the authorization-relevant
     # Context: the Mission and the adoption declarations.
     bound: dict[str, Any] = field(default_factory=dict)
+    # What an approver is shown of the history the denial was decided on, as
+    # earlier attempts at its target (``_earlier_attempts``).
+    earlier: tuple[dict[str, Any], ...] = ()
     # Set when a person approves: the latest expiry of its approvals, each
     # counted from its own approval, apart from the request's window
     # (`expires`). Each approval is checked against its own expiry.
@@ -123,15 +127,31 @@ def _bound(request: EvaluationRequest) -> dict[str, Any]:
         "resource": obj("resource", {"type": request.resource.type, "id": request.resource.id},
                         request.resource.properties),
         "action": obj("action", {"name": request.action.name}, request.action.properties),
-        # The authorization-relevant Context (profile, "The composition
-        # predicate"): the Mission, the adoption declarations and, when
-        # present, context.actor, as sent.
+        # The Context the denial binds (profile, Approvals, ARAP binding):
+        # the Mission and, when present, context.actor, which are
+        # authorization-relevant, and the adoption declarations, capability
+        # declarations this record keeps for the shared-state binding until
+        # ARAP binds them apart (openid/authzen issue #754), all as sent.
         "context": context,
         # Who may not approve it besides the Subject: the actors of its
         # delegation chain (profile, Approvals). Not compared.
         "actors": sorted(_chain(request.subject.properties.get("act"))
                          | _chain(request.context.get("actor"))),
     }
+
+
+def _earlier_attempts(history: list[Act], resource: str) -> tuple[dict[str, Any], ...]:
+    """Every Act of the history the denial was decided on that has the denied
+    request's resource, whatever its action, and is not failed, the open ones
+    first, each with the outcome read then (profile, Approvals, "What the
+    approver sees"). An open one may still take effect; one completed with no
+    result classes may be one an operator closed. An Act Record holds no
+    properties, so another call to the same target is shown as well."""
+    acts = sorted((a for a in history
+                   if a.resource == resource and a.outcome is not ActOutcome.FAILED),
+                  key=lambda a: (a.outcome is not ActOutcome.OPEN, a.seq))
+    return tuple({"seq": a.seq, "action": a.action, "outcome": a.outcome.value,
+                  "result_classes": sorted(a.result_classes)} for a in acts)
 
 
 def _chain(actor: Any) -> set[str]:
@@ -218,8 +238,9 @@ POLICY_MISMATCH_RETRY_AFTER = 60
 
 def _retry_signal(request: EvaluationRequest, decision: Decision) -> Decision:
     """ARAP: on a re-evaluation that presents an approval, the PEP drives its
-    next step from ``next_action``; these reasons are not registered with
-    ARAP, so without it the PEP would fall back to "none" and abandon a valid
+    next step from ``next_action``, which the PDP SHOULD send on every denial
+    ("Deny a Re-evaluation"); these reasons are not registered with ARAP, so
+    without it the PEP would fall back to "none" and abandon a valid
     approval. Only such a re-evaluation gets the signal."""
     if decision.decision or not isinstance(request.context.get("approval"), dict):
         return decision
@@ -237,7 +258,11 @@ def _retry_signal(request: EvaluationRequest, decision: Decision) -> Decision:
         # the fresh context.access_request it carries; otherwise stop.
         action = "request" if decision.access_request is not None else "none"
         return replace(decision, context={**decision.context, "next_action": action})
-    return decision
+    # Any other denial, such as the plain deny of check (d) for a PEP that has
+    # not opted in to mission_record: no approval can lead to a permit, so the
+    # PEP stops. next_action is ARAP's, not the Obligations Core's, so the deny
+    # stays a plain core DENY.
+    return replace(decision, context={**decision.context, "next_action": "none"})
 
 
 @dataclass
@@ -264,7 +289,7 @@ class CompositionPDP:
     clock: Callable[[], datetime] = field(default=lambda: datetime.now(UTC), repr=False)
     _pending: dict[str, _PendingApproval] = field(default_factory=dict, repr=False)
     # approval.id -> the evaluation_id of the requestable denial it approves,
-    # and its approved_until.
+    # its approved_until, and the PEP that requested it (None when unknown).
     _approvals: dict[str, tuple[str, datetime, str | None]] = field(default_factory=dict,
                                                                     repr=False)
     _approval_lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
@@ -328,6 +353,27 @@ class CompositionPDP:
         with self._approval_lock:
             pending = self._pending.get(evaluation_id)
             return None if pending is None else (pending.bound, pending.expires)
+
+    def approver_view(self, evaluation_id: str) -> dict[str, Any] | None:
+        """For the Access Request Service: what it shows an approver of the
+        requestable denial ``evaluation_id`` (profile, Approvals, "What the
+        approver sees"): the denied request as bound, the actors of its
+        delegation chain, the names of the Restricted Sequences it completed
+        and the earlier attempts at its target. None if this PDP issued no
+        such denial (or it was spent or purged)."""
+        with self._approval_lock:
+            pending = self._pending.get(evaluation_id)
+            if pending is None:
+                return None
+            bound = pending.bound
+            # Copies: a caller that edits what it shows must not change the
+            # denial binding later submissions are compared with.
+            return copy.deepcopy({
+                "request": {k: bound[k] for k in ("subject", "action", "resource")},
+                "actors": bound["actors"],
+                "sequences": sorted(pending.sequences),
+                "earlier": list(pending.earlier),
+            })
 
     def _approved(self, request: EvaluationRequest, candidate: Act,
                   completed: tuple[str, ...]) -> str | None:
@@ -416,20 +462,23 @@ class CompositionPDP:
         set of Restricted Sequences."""
         try:
             history = self.mhs.history(mission_id, policy=self.policy.digest)
-        except HistoryUnavailable:
-            # The History Authority cannot be read: fail closed, with a reason
-            # distinct from a policy denial so the PEP can retry.
-            return Decision(decision=False, reason=REASON_HISTORY_UNAVAILABLE)
         except PolicyMismatch:
             # This PDP applies a different set than the one the Mission is
             # bound to (a replica mid-rollout, or a changed policy). Deciding
             # would apply rule 5 and the predicate with the wrong sequences,
             # and Acts this set ignores may never have been admitted.
             return Decision(decision=False, reason=REASON_POLICY_MISMATCH)
+        except Exception:
+            # The History Authority cannot be read (HistoryUnavailable, or any
+            # other failure of the read): fail closed for this request only,
+            # with a reason distinct from a policy denial so the PEP can retry,
+            # and never fail a whole batch (profile, PDP rules).
+            return Decision(decision=False, reason=REASON_HISTORY_UNAVAILABLE)
         if [a.seq for a in history] != list(range(1, len(history) + 1)) or not all(
                 map(_valid_act, history)):
-            # A gap or reordering: the history is not complete up to its own
-            # last position, so the predicate cannot be evaluated.
+            # A gap, a reordering or an invalid Act Record: the history is not
+            # complete up to its own last position, so the predicate cannot be
+            # evaluated (rule 4).
             return Decision(decision=False, reason=REASON_HISTORY_UNAVAILABLE)
         return history
 
@@ -520,6 +569,7 @@ class CompositionPDP:
                             sequences=frozenset(verdict.completed),
                             request=_request_digest(request),
                             bound=_bound(request),
+                            earlier=_earlier_attempts(history, candidate.resource),
                         )
                         self._per_mission[mission_id] = self._per_mission.get(mission_id, 0) + 1
                 if evaluation_id is not None:

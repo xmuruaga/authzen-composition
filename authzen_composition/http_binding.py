@@ -28,6 +28,7 @@ from urllib.parse import parse_qs, unquote
 from authzen_composition.mhs import (
     HistoryConflict,
     MissionHistoryService,
+    NoActAtPosition,
     NotPermitted,
     OutcomeAlreadySet,
     PolicyMismatch,
@@ -185,7 +186,7 @@ def read_json_body(environ: dict[str, Any]) -> dict[str, Any]:
     # Checked before parsing: how deep the JSON parser itself can recurse
     # depends on the platform's stack, and later processing (canonical
     # digests, comparisons) recurses into the body.
-    if _depth(text) > MAX_BODY_DEPTH:
+    if json_depth(text) > MAX_BODY_DEPTH:
         raise ValueError("body nested too deeply")
     data = json.loads(text, object_pairs_hook=_unique_keys, parse_constant=_reject_constant)
     if not isinstance(data, dict):
@@ -197,7 +198,7 @@ def read_json_body(environ: dict[str, Any]) -> dict[str, Any]:
 _STRING_OR_BRACKET = re.compile(r'"(?:[^"\\]|\\.)*"|[\[\]{}]', re.DOTALL)
 
 
-def _depth(text: str) -> int:
+def json_depth(text: str) -> int:
     """How many objects and arrays deep a JSON text nests, read without parsing
     it, so malformed and unterminated text counts too."""
     deepest = level = 0
@@ -281,6 +282,13 @@ class MHSHttpApp:
             # The ``reason`` lets a remote client tell the two 409s apart
             # without parsing the human-readable ``error``.
             status, body = "409 Conflict", {"error": str(exc), "reason": "seq_conflict"}
+        except NoActAtPosition as exc:
+            # An outcome conflict, flagged with no_act so that a PEP can tell
+            # this expected refusal (the failed it reports for an admission it
+            # gave up on) from a final one; a client that does not know the
+            # flag reads an ordinary outcome conflict.
+            status, body = "409 Conflict", {"error": str(exc), "reason": "outcome_conflict",
+                                             "no_act": True}
         except (UnknownAct, OutcomeAlreadySet) as exc:
             status, body = "409 Conflict", {"error": str(exc), "reason": "outcome_conflict"}
         except (KeyError, ValueError) as exc:

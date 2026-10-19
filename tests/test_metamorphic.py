@@ -80,8 +80,8 @@ def test_an_act_matching_no_step_never_changes_the_decision(seqs, acts, cand, wh
 @settings(max_examples=3000, deadline=None, suppress_health_check=[HealthCheck.too_slow])
 @given(seqs=seq_lists, extra=seq_lists, acts=act_lists, cand=cands)
 def test_adding_sequences_never_permits_more(seqs, extra, acts, cand) -> None:
-    # With the label domain derived from the steps this failed only on rare
-    # seeds; 3000 examples, plus the pinned case below.
+    # 3000 examples, since violations are rare;
+    # test_derived_label_domain_is_not_monotone below pins a counterexample.
     permit_more, _ = _decide([*seqs, *extra], acts, cand)
     permit_less, _ = _decide(seqs, acts, cand)
     assert not (permit_more and not permit_less)
@@ -125,8 +125,8 @@ def test_failed_acts_are_as_if_never_admitted(seqs, acts, cand) -> None:
     assert _decide(seqs, acts, cand) == _decide(seqs, kept, cand)
 
 
-# With the label domain derived from the steps, an
-# unrelated sequence that names a class narrows the top for every other one.
+# With the label domain derived from the steps, an unrelated sequence that
+# names a class narrows the top for every other one.
 _A = RestrictedSequence("a", (SequenceStep("write", result_classes=frozenset({"public"})),
                               SequenceStep("write")))
 _B = RestrictedSequence("b", (SequenceStep("read"),

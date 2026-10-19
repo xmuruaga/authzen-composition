@@ -1,7 +1,7 @@
 """The composition model: acts, result classes, restricted sequences, policy.
 
-A ``RestrictedSequence``
-is an ordered tuple of ``SequenceStep`` patterns. ``CompositionPolicy.completes``
+A ``RestrictedSequence`` is an ordered tuple of ``SequenceStep`` patterns.
+``CompositionPolicy.completes``
 answers the one question the predicate asks: would admitting a candidate act
 into the mission history, taken in admission order, complete a restricted
 sequence with the candidate as one of its elements? Without persistent steps

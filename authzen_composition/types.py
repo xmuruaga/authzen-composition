@@ -155,8 +155,8 @@ REASON_POLICY_MISMATCH = "policy_mismatch"
 # A PEP lists it, and `mission_record` in supported_obligations, to receive
 # `mission_record`.
 EXTENSION_OBLIGATIONS = "obligations"
-# Capability URN for PDP metadata (placeholder until registered).
-# The Obligations Core's capability URN (openid/authzen PR #697).
+# The Obligations Core's capability URN (openid/authzen PR #697), not yet
+# registered.
 CAPABILITY_OBLIGATIONS = "urn:openid:authzen:capability:obligations"
 # ARAP, advertised only with a configured Access Request Endpoint.
 CAPABILITY_ACCESS_REQUEST = "urn:openid:authzen:capability:access-request"

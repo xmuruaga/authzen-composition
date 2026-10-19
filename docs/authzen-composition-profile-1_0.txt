@@ -4,10 +4,10 @@
 
                                                               X. Muruaga
                                                              Independent
-                                                         14 October 2026
+                                                         19 October 2026
 
 
-           AuthZEN Mission Composition Profile 1.0 - Draft 0
+           AuthZEN Mission Composition Profile 1.0 - Draft 1
                     authzen-composition-profile-1_0
 
 Abstract
@@ -28,28 +28,28 @@ Table of Contents
    4.  Request . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
    5.  The composition predicate . . . . . . . . . . . . . . . . . .   8
      5.1.  Approvals . . . . . . . . . . . . . . . . . . . . . . . .   9
-   6.  Result classes  . . . . . . . . . . . . . . . . . . . . . . .  12
-   7.  Step patterns . . . . . . . . . . . . . . . . . . . . . . . .  13
-   8.  History Authority . . . . . . . . . . . . . . . . . . . . . .  16
-   9.  Ordering rules  . . . . . . . . . . . . . . . . . . . . . . .  18
-     9.1.  One set of Restricted Sequences per Mission . . . . . . .  22
-     9.2.  Policy digest . . . . . . . . . . . . . . . . . . . . . .  23
-   10. The mission_record obligation . . . . . . . . . . . . . . . .  23
-   11. PDP processing rules  . . . . . . . . . . . . . . . . . . . .  25
-   12. PEP processing rules  . . . . . . . . . . . . . . . . . . . .  27
-   13. Conformance . . . . . . . . . . . . . . . . . . . . . . . . .  29
-   14. Extension checklist . . . . . . . . . . . . . . . . . . . . .  30
-   15. Security considerations . . . . . . . . . . . . . . . . . . .  32
-   16. Privacy considerations  . . . . . . . . . . . . . . . . . . .  38
-   17. Open questions  . . . . . . . . . . . . . . . . . . . . . . .  38
-   18. IANA considerations . . . . . . . . . . . . . . . . . . . . .  41
-     18.1.  OpenID Foundation registry considerations  . . . . . . .  43
-   19. References  . . . . . . . . . . . . . . . . . . . . . . . . .  43
-     19.1.  Normative References . . . . . . . . . . . . . . . . . .  43
-     19.2.  Informative References . . . . . . . . . . . . . . . . .  45
-   Appendix A.  Worked example (non-normative) . . . . . . . . . . .  47
-   Appendix B.  Formal basis (non-normative) . . . . . . . . . . . .  47
-   Appendix C.  Related work (non-normative) . . . . . . . . . . . .  48
+   6.  Result classes  . . . . . . . . . . . . . . . . . . . . . . .  14
+   7.  Step patterns . . . . . . . . . . . . . . . . . . . . . . . .  15
+   8.  History Authority . . . . . . . . . . . . . . . . . . . . . .  18
+   9.  Ordering rules  . . . . . . . . . . . . . . . . . . . . . . .  20
+     9.1.  One set of Restricted Sequences per Mission . . . . . . .  23
+     9.2.  Policy digest . . . . . . . . . . . . . . . . . . . . . .  24
+   10. The mission_record obligation . . . . . . . . . . . . . . . .  25
+   11. PDP processing rules  . . . . . . . . . . . . . . . . . . . .  27
+   12. PEP processing rules  . . . . . . . . . . . . . . . . . . . .  29
+   13. Conformance . . . . . . . . . . . . . . . . . . . . . . . . .  32
+   14. Extension checklist . . . . . . . . . . . . . . . . . . . . .  33
+   15. Security considerations . . . . . . . . . . . . . . . . . . .  35
+   16. Privacy considerations  . . . . . . . . . . . . . . . . . . .  42
+   17. Open questions  . . . . . . . . . . . . . . . . . . . . . . .  43
+   18. IANA considerations . . . . . . . . . . . . . . . . . . . . .  47
+     18.1.  OpenID Foundation registry considerations  . . . . . . .  49
+   19. References  . . . . . . . . . . . . . . . . . . . . . . . . .  49
+     19.1.  Normative References . . . . . . . . . . . . . . . . . .  49
+     19.2.  Informative References . . . . . . . . . . . . . . . . .  51
+   Appendix A.  Worked example (non-normative) . . . . . . . . . . .  52
+   Appendix B.  Formal basis (non-normative) . . . . . . . . . . . .  53
+   Appendix C.  Related work (non-normative) . . . . . . . . . . . .  53
 
 
 
@@ -58,13 +58,14 @@ Muruaga                      Standards Track                    [Page 1]
                            AuthZEN Composition              October 2026
 
 
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  49
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  55
 
 1.  Status of this draft
 
    Individual draft for discussion.  It is not a work item of the OpenID
    AuthZEN Working Group.  Member names, predicate names and registry
-   values are placeholders.
+   values are placeholders.  Copyright 2026 Xabier Muruaga; licensed
+   under the Apache License, Version 2.0.
 
    Apart from JCS [RFC8785], SHA-256 [RFC6234], UTF-8 [RFC3629], JSON
    [RFC8259], URIs [RFC3986] and the registration policies of [RFC8126],
@@ -96,24 +97,6 @@ Muruaga                      Standards Track                    [Page 1]
    defined, prohibited ordered sequence of Acts within one Mission, when
    those Acts are enforced by different PEPs.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                    [Page 2]
-
-                           AuthZEN Composition              October 2026
-
-
    *The predicate is not new.* Denying the step that would complete a
    prohibited trace is the security-automaton model of execution
    monitoring [SCHNEIDER].  What is missing is the interoperable
@@ -123,6 +106,14 @@ Muruaga                      Standards Track                    [Page 2]
    That contract is what this profile defines.  The wire protocol to the
    History Authority is still the deployment's (open question 1), so
    components from different vendors interoperate once they agree on it,
+
+
+
+Muruaga                      Standards Track                    [Page 2]
+
+                           AuthZEN Composition              October 2026
+
+
    and nothing yet lets a PDP detect a History Authority that omits or
    reorders records (open question 12).  The policy digest, which every
    PDP of a Mission has to compute alike, is defined here (Section 9.2).
@@ -162,6 +153,15 @@ Muruaga                      Standards Track                    [Page 2]
    This profile reads only a Mission's identifier and defines the
    contract between the PEPs, the PDP and the authority that orders
    their Acts, so it depends on them only for context.actor, where a
+   deployment carries the actor there (Section 5.1), and applies to any
+   Mission model.  The same predicate could also be named as a history
+   predicate type there (open question 4); where it belongs is for the
+   Working Group to decide.
+
+
+
+
+
 
 
 
@@ -169,11 +169,6 @@ Muruaga                      Standards Track                    [Page 3]
 
                            AuthZEN Composition              October 2026
 
-
-   deployment carries the actor there (Section 5.1), and applies to any
-   Mission model.  The same predicate could also be named as a history
-   predicate type there (open question 4); where it belongs is for the
-   Working Group to decide.
 
 3.  Terminology
 
@@ -185,8 +180,9 @@ Muruaga                      Standards Track                    [Page 3]
 
    PEP, PDP, Access Evaluation and Decision are used as in [AUTHZEN];
    Obligation and Obligation Type as in [OBLIGATIONS]; requestable
-   denial, Approval Result (an approval) and Access Request Service as
-   in [ARAP].
+   denial, Approval Result (an approval), Access Request Service, Access
+   Request Endpoint, Task Handle, denial binding and authorization-
+   relevant Context as in [ARAP]; Access Evaluations as in [AUTHZEN].
 
    Mission:  A unit of delegated work with a stable identifier, issued
       by a party other than the agent.  Where this document says "the
@@ -218,6 +214,10 @@ Muruaga                      Standards Track                    [Page 3]
       (Section 8).
 
    Admission Order:  The order of positions the History Authority
+      assigned to the Acts of a Mission.
+
+   Open Act:  An admitted Act whose outcome has not been recorded.
+
 
 
 
@@ -225,10 +225,6 @@ Muruaga                      Standards Track                    [Page 4]
 
                            AuthZEN Composition              October 2026
 
-
-      assigned to the Acts of a Mission.
-
-   Open Act:  An admitted Act whose outcome has not been recorded.
 
    Act Record:  The History Authority's record of one admitted Act
       (Section 8).
@@ -256,32 +252,6 @@ Muruaga                      Standards Track                    [Page 4]
    A request evaluated under this profile carries the Mission in
    context.mission:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                    [Page 5]
-
-                           AuthZEN Composition              October 2026
-
-
    {
      "subject": { "type": "agent", "id": "agent-7" },
      "action": {
@@ -301,6 +271,16 @@ Muruaga                      Standards Track                    [Page 5]
        "supported_obligations": ["mission_record"]
      }
    }
+
+
+
+
+
+
+Muruaga                      Standards Track                    [Page 5]
+
+                           AuthZEN Composition              October 2026
+
 
    *  mission.id (REQUIRED, a non-empty String) identifies the Mission.
       This profile uses it alone as the History Authority's key.  The
@@ -322,22 +302,16 @@ Muruaga                      Standards Track                    [Page 5]
       Access Evaluation (in the Authorization API's HTTP binding, with
       400 Bad Request [AUTHZEN]); in an Access Evaluations request it
       denies that evaluation, with the error in its own context
-      ([AUTHZEN], Errors), and decides the others.  A mission member
-      whose value is null is absent.
+      ([AUTHZEN], Errors), and decides the others (pending openid/
+      authzen issue #748).  A mission member whose value is null is read
+      as absent; a PEP omits it rather than sending null, since ARAP's
+      structural comparison tells the two apart [ARAP].
 
    *  The mission-bound drafts define a context.mission member of their
       own, in which issuer is REQUIRED, as here, and further members
       carry the authority anchor, the policy version and view, and the
       origin principal; its state is carried separately, in
       context.mission_state_observation [MISSION-AUTHZEN].  A request
-
-
-
-Muruaga                      Standards Track                    [Page 6]
-
-                           AuthZEN Composition              October 2026
-
-
       that carries their member carries everything this profile reads:
       it reads id and ignores members it does not define.  Where their
       Mission identifiers are unique only per issuer, two Missions can
@@ -356,6 +330,14 @@ Muruaga                      Standards Track                    [Page 6]
       Mission.  The Mission decides which history is read, so the
       request that carries it MUST be integrity-protected and
       authenticated between the PEP and the PDP (for example over
+
+
+
+Muruaga                      Standards Track                    [Page 6]
+
+                           AuthZEN Composition              October 2026
+
+
       mutually authenticated TLS), as the Extensibility Model asks of an
       extension that carries decision-relevant state ([AUTHZEN-EXT],
       Requirements for Extension Specifications, Binding): a Mission
@@ -380,28 +362,15 @@ Muruaga                      Standards Track                    [Page 6]
       SHOULD NOT give one agent instance credentials for two Missions at
       once (Section 15, Flows between Missions).
 
-
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                    [Page 7]
-
-                           AuthZEN Composition              October 2026
-
-
    *  A request without context.mission has no history to be evaluated
       against.  If it is for a Step-matching Act, the PDP MUST deny it
       with history_unavailable; any other request is outside this
       profile.  In an Access Evaluations request a per-evaluation
       context replaces the top-level one rather than merging with it
-      ([AUTHZEN], Default values; [AUTHZEN-EXT]; [OBLIGATIONS]), so a
-      PEP that supplies one repeats mission in it, as it repeats the
-      adoption declarations.
+      ([AUTHZEN], Default values, says that it overrides the top-level
+      default; [AUTHZEN-EXT], Placement, and [OBLIGATIONS] read that as
+      replacement), so a PEP that supplies one repeats mission in it, as
+      it repeats the adoption declarations.
 
    *  supported_mandatory_extensions is the opt-in member of the AuthZEN
       Extensibility Model [AUTHZEN-EXT], and supported_obligations the
@@ -412,19 +381,27 @@ Muruaga                      Standards Track                    [Page 7]
       an Array reads as absent, so it opts in to nothing; an entry that
       is not a non-empty String is ignored, as the Obligations Core
       requires of any value the PDP did not advertise [OBLIGATIONS]; a
-      repeated entry counts once; an omitted member is empty.  Together
-      these two members are the adoption declarations.  A PEP that lists
-      both is said here to opt in to mission_record.  This profile adds
-      no mandatory element of its own beyond that obligation, so it
-      needs no signal of its own: as the Extensibility Model provides
-      for profiles, it is adopted by opting into the extension of its
-      mandatory element, in the same way as the Standard Types Profile
-      proposed in openid/authzen PR #697.  There is no composition
-      extension identifier: a PEP need not list one, and a PDP ignores
-      it if listed, as it ignores any listed extension it does not
-      implement.  A PEP discovers that a PDP implements this profile
-      from mission_record in the PDP's supported_obligations metadata
-      (Section 11).
+      PEP sends no repeated entry, and a PDP counts a repeat once; an
+      omitted member is empty.  Together these two members are the
+      adoption declarations.  A PEP that lists both is said here to opt
+      in to mission_record.  This profile adds no mandatory element of
+      its own beyond that obligation, so it needs no signal of its own:
+
+
+
+Muruaga                      Standards Track                    [Page 7]
+
+                           AuthZEN Composition              October 2026
+
+
+      as the Extensibility Model provides for profiles, it is adopted by
+      opting into the extension of its mandatory element, in the same
+      way as the Standard Types Profile proposed in openid/authzen PR
+      #697.  There is no composition extension identifier: a PEP need
+      not list one, and a PDP ignores it if listed, as it ignores any
+      listed extension it does not implement.  A PEP discovers that a
+      PDP implements this profile from mission_record in the PDP's
+      supported_obligations metadata (Section 11).
 
 5.  The composition predicate
 
@@ -442,14 +419,6 @@ Muruaga                      Standards Track                    [Page 7]
    or of several, can take effect, in sequence order, between the same
    two consecutive admitted Acts or after the last one.  A persistent
    Act can fill one step of any kind at its own position and, besides
-
-
-
-Muruaga                      Standards Track                    [Page 8]
-
-                           AuthZEN Composition              October 2026
-
-
    it, any number of persistent steps, each at a later point; the
    candidate may then fill an earlier step than the last.  Every other
    Act fills at most one step.  Without persistent steps this is
@@ -473,6 +442,14 @@ Muruaga                      Standards Track                    [Page 8]
       approve, the denial MUST NOT be requestable, and neither may a
       denial to a PEP that has not opted in to mission_record
       (Section 4), since its re-evaluation would end in the plain deny
+
+
+
+Muruaga                      Standards Track                    [Page 8]
+
+                           AuthZEN Composition              October 2026
+
+
       of check (d), nor a denial the PDP's other policy would also give:
       no approval could lead to a permit.  Withholding
       context.access_request is a choice of which extension members to
@@ -491,21 +468,15 @@ Muruaga                      Standards Track                    [Page 8]
       subject, its action and resource with their properties, and its
       adoption declarations as the PDP reads them: whether obligations
       is listed, and which of the types the PDP advertises are listed
-      [OBLIGATIONS]), for the PEP that requested it where the PDP
-      authenticates its caller (ARAP's approval verification), in the
-      same Mission, at the position the denied Act would have been
-      admitted at (the expected_seq it would have had), and only to the
+      [OBLIGATIONS]), for the PEP that requested it, by the identity the
+      PDP authenticates and not by instance, where the PDP authenticates
+      its caller (ARAP's approval verification), so that a process
+      holding another credential needs a new approval, in the same
+      Mission, at the position the denied Act would have been admitted
+      at (the expected_seq it would have had), and only to the
       Restricted Sequences that denial completed.  A person approves a
       request, not an action name: the same send with a different
       attachment, or by another agent, is a different request.  That
-
-
-
-Muruaga                      Standards Track                    [Page 9]
-
-                           AuthZEN Composition              October 2026
-
-
       holds only for what the request carries, so the PEP carries it
       (Section 12): every argument of the call that decides what the
       effect discloses, or to whom, is in action.properties or
@@ -516,19 +487,33 @@ Muruaga                      Standards Track                    [Page 9]
       by value (a later write can then no longer change what it
       delivers).
 
-   *  *ARAP binding.* In ARAP's terms, mission,
-      supported_mandatory_extensions and supported_obligations are
-      authorization-relevant Context of the denial, and so is
-      context.actor when the denied request carried it, and a PDP that
-      conveys the denial binding in ARAP's material lists them as such
-      [ARAP].  The adoption declarations are bound as capability
-      declarations are: they decide whether an approval applies, and are
-      not otherwise an input to policy ([AUTHZEN-EXT]).  An Access
-      Request repeats them as sent, and the Access Request Service
-      compares them structurally, as ARAP does; at re-evaluation the
-      declarations are compared by what the PDP reads from them, a scope
-      ARAP lets a PDP record, so that listing an extension or a type the
-      PDP ignores does not change whether an approval applies.
+   *  *ARAP binding.* In ARAP's terms, mission, and context.actor when
+      the denied request carried it, are authorization-relevant Context
+      of the denial, and a PDP that conveys the denial binding in ARAP's
+      material lists them as such [ARAP].  The adoption declarations are
+      capability declarations, which the Extensibility Model requires
+      the denial binding to cover: they decide whether an approval
+      applies, and are not otherwise an input to policy ([AUTHZEN-EXT]).
+      ARAP has no set for them yet (openid/authzen issue #754 proposes
+      one, and rejects listing them as authorization-relevant Context),
+      so until it does a PDP records them with the denial, kept with
+      evaluation_id (Representation), and does not list them in
+
+
+
+Muruaga                      Standards Track                    [Page 9]
+
+                           AuthZEN Composition              October 2026
+
+
+      binding_context_members; a denial bound only by a binding_token
+      cannot bind them yet, so a PDP does not make such a denial
+      requestable (open question 14).  An Access Request repeats them as
+      sent, and the Access Request Service compares them structurally,
+      as ARAP does; at re-evaluation the declarations are compared by
+      what the PDP reads from them, a scope ARAP lets a PDP record, so
+      that listing an extension or a type the PDP ignores does not
+      change whether an approval applies.
 
    *  *The actor.* ARAP's default comparison leaves out
       subject.properties.act, because a PEP may move the actor to
@@ -538,8 +523,10 @@ Muruaga                      Standards Track                    [Page 9]
       for the same principal cannot use the approval its delegator
       obtained ([ARAP] lets a PDP record a narrower scope than its
       default; how ARAP carries the actor at re-evaluation is still
-      open, openid/authzen issue #744).  A PEP that evaluates again with
-      the approval therefore sends the same subject, action and
+      open, openid/authzen issue #744; draft PR #756, pending the
+      Working Group, would keep it in the submitted Subject, compare it
+      and cover it in the denial binding).  A PEP that evaluates again
+      with the approval therefore sends the same subject, action and
       resource, properties included, subject.properties.act among them.
       The two places bind at different points.  An Access Request
       submission may move subject.properties.act to client.actor, and an
@@ -554,6 +541,19 @@ Muruaga                      Standards Track                    [Page 9]
       compares subject.properties.act whole, and context.actor whole
       except, where it is an Object, its client_instance_id member: a
       correlator of one instance of the client, which ARAP lets another
+      instance replace when it resumes a Task Handle (a deployment that
+      needs the same instance to use the approval says so in policy).
+      Prior actors are compared in both, so the scope can withhold an
+      approval RFC 8693 would allow but never grant one it would not.
+
+   *  *One Act, at one position.* An approval MUST NOT lead to more than
+      one admitted Act: a PDP honors it only at the position it was
+      given for, where rule 2 admits one Act, and only before its
+      approved_until [ARAP].  ARAP's default scope would let the same
+      request reuse an approval until it expires; this profile narrows
+      that scope to one position, because every admission changes the
+      history the person approved against.  The count of one follows
+      from rule 2; the approval carries no count of its own.  If another
 
 
 
@@ -562,54 +562,54 @@ Muruaga                      Standards Track                   [Page 10]
                            AuthZEN Composition              October 2026
 
 
-      instance replace when it resumes a Task Handle (a deployment that
-      needs the same instance to use the approval says so in policy).
-      Prior actors are compared in both, so the scope can withhold an
-      approval RFC 8693 would allow but never grant one it would not.
+      Act is admitted in the meantime, the approval is out of its scope,
+      in ARAP's terms, and the PDP evaluates afresh; [ARAP] leaves to
+      the PDP whether an approval applies under current policy.
 
-   *  *One use, at one position.* An approval MUST NOT lead to more than
-      one admitted Act: a PDP honors it only at the position it was
-      given for, where rule 2 admits one Act, and only before its
-      approved_until [ARAP].  ARAP's context.access_request.expires_at
-      bounds when the Access Request can be submitted, and
-      task.expires_at how long it can wait for a decision; a deployment
-      of this profile sets task.expires_at no later than the denial's
-      expires_at while the request is pending, so a request still
-      pending when that window closes expires and is not approved (ARAP
-      lets the Access Request Service expire requests by local policy).
+   *  *Windows.* ARAP's context.access_request.expires_at bounds when
+      the Access Request can be submitted, and task.expires_at how long
+      it can wait for a decision.  A deployment of this profile sets
+      task.expires_at no later than the denial's expires_at while the
+      request is pending, since the PDP keeps its record of the denial
+      (Representation) only until then; to give approvers more time, it
+      gives the denial a later expires_at.  A request still pending when
+      that window closes expires and is not approved (ARAP lets the
+      Access Request Service expire requests by local policy).
       approved_until runs from the approval (approved_at), for a
       lifetime the deployment configures, and on approval the Access
       Request Service moves task.expires_at to no earlier than
       approved_until, so that the result stays retrievable while the
       approval can be used.  A PEP stops polling at the task.expires_at
-      it last saw [ARAP], so it collects an approval given after its
-      last poll only if it polls again before then: a PEP polls more
-      often as that time nears.  A PDP that records the approval as used
-      at its first permit (a denial for another reason does not use it
-      up) also keeps a second permit from being issued, but then a
-      permit whose response is lost costs the approval.  [ARAP] leaves
-      to the PDP whether an approval applies under current policy, and
-      its default scope would let the same request reuse it until it
-      expires; this profile narrows that scope to one use at one
-      position, because every admission changes the history the person
-      approved against.  If another Act is admitted in the meantime, the
-      PDP evaluates afresh.  In ARAP's terms the approval is then out of
-      its scope.  At a re-evaluation that presented an approval, a
+      it last saw [ARAP], so it caps its backoff to poll again before
+      then.
+
+   *  *Re-evaluation.* At a re-evaluation that presented an approval, a
       prohibited_composition denial MUST carry next_action set to
       request, with a fresh access_request, when it is requestable
       (ARAP's default for out_of_scope; the PEP needs the fresh
       access_request to ask again), and none otherwise, whether the
-      approval expired, was used, or does not apply.
+      approval expired, was consumed, its position was taken, or it does
+      not apply.  One exception: a PDP that could not check the
+      presented approval's current status because its status source was
+      unreachable, not because the approval failed verification, SHOULD
+      instead set next_action to retry, with retry_after and no fresh
+      access_request, while approved_until has not passed and only where
+      the caller may learn that the approval exists (openid/authzen
+      issue #747; draft PR #758).
 
-   *  *Replicas.* Because the approval names a position and only one Act
-      can be admitted there (rule 2), PDP replicas that can each verify
-      an approval (for example a signed approval.state [ARAP]) without
-      sharing whether it was used can each issue a permit with it, and
-      still cannot let it admit two Acts.
-
-   *  *Representation.* ARAP leaves the representation of a narrower
-      scope to profiles and deployments [ARAP], and this profile does
-      not define one yet (open question 14).  A PDP MUST be able to
+   *  *Lost responses.* A PDP that consumes the approval at its first
+      permit, atomically and in state all its replicas share (a denial
+      for another reason does not consume it), keeps a second permit
+      from being issued; replicas that do not share that state can each
+      issue one, and only admission then bounds them.  The cost is that
+      a permit that leads to no admitted Act, because its response was
+      lost or its admission was given up before it committed, costs the
+      approval.  Without that consumption a lost permit costs nothing:
+      the PEP evaluates again with the approval, which still applies
+      while no Act has been admitted at its position and it has not
+      expired.  A lost admission acknowledgement costs nothing by itself
+      either: a retry with the same admission_id returns the Act if the
+      admission committed, and admits it otherwise while the position is
 
 
 
@@ -618,6 +618,65 @@ Muruaga                      Standards Track                   [Page 11]
                            AuthZEN Composition              October 2026
 
 
+      free (rule 3; Section 8, item 2).  If the PEP gives up instead, it
+      records the admission failed (rule 3).  Had the admission
+      committed, the position is taken, and the approval with it, with
+      nothing performed.  Had it not, the failed is refused and the
+      position stays free, with the approval still applying there unless
+      the PDP consumed it; an admission that commits only after that
+      refusal takes the position and stays open, at the conservative
+      top, until an operator closes it or the Mission ends (Section 15,
+      Open Acts).
+
+   *  *What an approval bounds.* Of the three guarantees openid/authzen
+      issue #737 distinguishes (at most one approval-dependent permit,
+      one logical operation, one execution at the resource), an approval
+      here gives a different one: at most one admitted Act. An Act, one
+      position of the Mission, is the only operation identity this
+      profile defines, and it is not the deployment's unit of work.  At
+      most one permit needs the PDP to consume the approval atomically,
+      in state its replicas share; one logical operation needs the
+      resource to deduplicate on what identifies the effect; and only
+      the resource can give one execution.  So a PDP that does not
+      consume the approval may issue more than one permit with it at its
+      position; a repeat after a timeout is a new Act at a new position
+      (Section 15, Repeated effects); a call sent again under the same
+      admission can perform the effect again; and whether the admitted
+      Act's effect happened only the resource knows (Section 12).
+
+   *  *Replicas.* Because the approval names a position and only one Act
+      can be admitted there (rule 2), PDP replicas that can each verify
+      an approval (for example a signed approval.state [ARAP]) without
+      sharing whether it was consumed can each issue a permit with it,
+      and still cannot let it admit two Acts.  This moves the
+      coordination that keeps an approval to one Act rather than
+      removing it: admission is the atomic check-and-consume of openid/
+      authzen issue #737, keyed on the position instead of the approval:
+      one linearizable step per Mission, failover included, made at the
+      History Authority itself and never at a read replica of it
+      (Section 8, item 2; Section 9, Stale reads), so PDP replicas need
+      no shared record of consumed approvals.  Every Step-matching Act
+      already needs the History Authority itself to admit it, so keeping
+      an approval to one Act adds no dependency: while it is unreachable
+      no admission is acknowledged and no Step-matching Act runs (rule
+      3), and a PDP that cannot read the history, from it or from a
+      replica, denies with history_unavailable (rule 4; Section 15,
+      Availability).  Honoring an approval still needs its current
+      status, as ARAP requires, and a replica that cannot check it
+      denies, as Re-evaluation says (Section 15, Approval state across
+      replicas).
+
+
+
+
+Muruaga                      Standards Track                   [Page 12]
+
+                           AuthZEN Composition              October 2026
+
+
+   *  *Representation.* ARAP leaves the representation of a narrower
+      scope to profiles and deployments [ARAP], and this profile does
+      not define one yet (open question 14).  A PDP MUST be able to
       determine, from the approval it is presented, the Mission, the
       position and the Restricted Sequences the denial completed: from
       its own record of the denial, kept with evaluation_id, which the
@@ -625,22 +684,56 @@ Muruaga                      Standards Track                   [Page 11]
       approval material it can verify that carries them.  A PDP that
       cannot MUST NOT make the denial requestable.
 
-   *  *What the approver sees, and who approves.* The denied request
-      does not show why it is prohibited: the same send is a false
-      positive in one Mission and an exfiltration in another (open
-      question 7).  An Access Request Service SHOULD show the approver
-      the Restricted Sequences the denial completes and, for each, the
-      action, the result classes and, where the approver may see them,
-      the resources of the Acts that fill its earlier steps, which the
-      PDP can derive from its record of the denial and the history at
-      its position.  Values the agent chose (identifiers, names, message
-      bodies, justifications) SHOULD be shown as the agent's, and
-      identifiers in a form that exposes confusable characters.  An
-      approval of prohibited_composition SHOULD come from a person, or
-      from an evaluator given no content that the agent, or a resource
-      the agent read, could have authored.  The subject MUST NOT be an
-      eligible approver, and neither SHOULD any actor in its delegation
-      chain.
+   *  *What the approver sees.* The denied request does not show why it
+      is prohibited: the same send is a false positive in one Mission
+      and an exfiltration in another (open question 7).  An Access
+      Request Service SHOULD show the approver the Restricted Sequences
+      the denial completes and, for each, the action, the result classes
+      and, where the approver may see them, the resources of the Acts
+      that fill its earlier steps.  It SHOULD also show each Act in the
+      history at the denial's position that is not failed and has the
+      denied request's resource, whatever its action, open ones first,
+      with its outcome there, and SHOULD tell the approver that an open
+      one is an earlier attempt whose effect may have happened or may
+      still happen, and that a completed one with no result classes may
+      be one an operator closed (Section 8, item 7).  Approving the
+      request does not resolve such an attempt: if it carried out the
+      same effect and ran or still runs, that effect happens twice
+      unless the resource deduplicates the two (Section 12; Section 15,
+      Repeated effects).  An Act Record holds no properties, so such an
+      Act may be another call to the same target, or another action on
+      it; it is shown all the same.  The PDP can derive all of this from
+      its record of the denial and the history at its position; ARAP's
+      material carries none of it (open question 14), so an Access
+      Request Service meets these SHOULDs only where it shares that
+      record and history, as with a denial bound by evaluation_id.
+      Values the agent chose (identifiers, names, message bodies,
+      justifications) SHOULD be shown as the agent's, and identifiers in
+      a form that exposes confusable characters.
+
+   *  *Who approves.* An approval of prohibited_composition SHOULD come
+      from a person, or from an automated evaluator given no content
+      that the agent, or a resource the agent read, could have authored.
+      It SHOULD come from a person, not from an automated evaluator,
+      where an earlier attempt shown is still open, or is completed with
+      no result classes and so may be one an operator closed, or where
+      the Access Request Service cannot show the history at the denial's
+      position.  The subject, and the current actor where the request
+      carries one (subject.properties.act, context.actor), MUST NOT be
+      eligible approvers, and neither SHOULD any earlier actor in the
+      delegation chain.  The Access Request Service takes context.actor
+
+
+
+Muruaga                      Standards Track                   [Page 13]
+
+                           AuthZEN Composition              October 2026
+
+
+      from the denial binding, and the Subject's actor, which that
+      binding leaves out, from the PDP's record of the denial or from
+      client.actor once it verifies it as [ARAP] requires (open question
+      14).
 
 6.  Result classes
 
@@ -665,15 +758,6 @@ Muruaga                      Standards Track                   [Page 11]
       known, and the step's patterns are matched against them as
       recorded.
 
-
-
-
-
-Muruaga                      Standards Track                   [Page 12]
-
-                           AuthZEN Composition              October 2026
-
-
    *  The label domain is part of policy and declared separately from
       the Restricted Sequences: the class patterns covering every class
       the deployment's PEPs and resources assign.  Recognition therefore
@@ -694,6 +778,13 @@ Muruaga                      Standards Track                   [Page 12]
       pattern would make every class recognized, so a PDP MUST refuse to
       load a set in which a step names it or whose declared label domain
       contains it; a step that means any class names no class pattern.
+
+
+
+Muruaga                      Standards Track                   [Page 14]
+
+                           AuthZEN Composition              October 2026
+
 
    *  A failed Act carries no result classes.
 
@@ -722,14 +813,6 @@ Muruaga                      Standards Track                   [Page 12]
    resource pattern, and one of its result classes matches at least one
    class pattern.
 
-
-
-
-Muruaga                      Standards Track                   [Page 13]
-
-                           AuthZEN Composition              October 2026
-
-
    A pattern is a string.  A pattern that does not end in * matches
    exactly that string.  A pattern that ends in * matches every string
    that begins with the pattern without that final *: external:* matches
@@ -751,6 +834,14 @@ Muruaga                      Standards Track                   [Page 13]
    within its reach, so it fills its step at every later point
    (Section 5).  Without the mark, creating the share link first, then
    reading salary data and writing it into the shared document, is the
+
+
+
+Muruaga                      Standards Track                   [Page 15]
+
+                           AuthZEN Composition              October 2026
+
+
    permitted order of (read, write, share), while the data ends up
    behind the link.  Revoking such an effect is not modeled; the Act
    stays in effect for the rest of the Mission.  Where every later
@@ -778,14 +869,6 @@ Muruaga                      Standards Track                   [Page 13]
    identifiers the PEP records: the request's action.name and
    resource.id, which the PEP sets to the identifiers it records.
    Neither resource.type nor any properties member takes part in
-
-
-
-Muruaga                      Standards Track                   [Page 14]
-
-                           AuthZEN Composition              October 2026
-
-
    matching; the canonical identifier MUST be unique across the
    deployment's resource types, so where a resource system's identifiers
    are unique only per type, as resource.id is in [AUTHZEN], it includes
@@ -807,6 +890,14 @@ Muruaga                      Standards Track                   [Page 14]
    domain the deployment defines, as an unrecognized result class is the
    top, so that a step keyed on that domain still matches it.
 
+
+
+
+Muruaga                      Standards Track                   [Page 16]
+
+                           AuthZEN Composition              October 2026
+
+
    *One target per Act.* An Act's resource denotes one target.  A call
    with several targets, such as a send to several recipients or to a
    list resolved to its members, MUST be admitted as one Act per target,
@@ -827,20 +918,9 @@ Muruaga                      Standards Track                   [Page 14]
    target.  It MUST also split a call with a target denied as a
    requestable prohibited_composition: an approval covers one Act at one
    position, and a target admitted and then recorded failed because
-   another was denied has used its approval and its position, so
-   evaluating the whole call again can need a fresh approval every time.
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 15]
-
-                           AuthZEN Composition              October 2026
-
+   another was denied has taken its position, and with it its approval,
+   so evaluating the whole call again can need a fresh approval every
+   time.
 
    *Where to put the persistent mark.* Write the sequence in the order
    the data flows and put the lasting effect at the step where it
@@ -860,6 +940,19 @@ Muruaga                      Standards Track                   [Page 15]
    they match however the data was relabeled.  This costs false
    positives (a later write counts even when it carried nothing
    sensitive), which ARAP routes to a person.
+
+
+
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 17]
+
+                           AuthZEN Composition              October 2026
+
 
 8.  History Authority
 
@@ -890,14 +983,6 @@ Muruaga                      Standards Track                   [Page 15]
        and answer a read that pins the Mission's set (item 6) only once
        the pin is durable;
 
-
-
-
-Muruaga                      Standards Track                   [Page 16]
-
-                           AuthZEN Composition              October 2026
-
-
    4.  allow an Act's outcome to move only from open to completed or
        failed, once, and only by the writer that admitted it, except as
        item 7 allows; accept a repeat of the outcome already recorded
@@ -917,6 +1002,14 @@ Muruaga                      Standards Track                   [Page 16]
        naming a digest), and return the history in Admission Order with
        every position from 1 to the latest, holding only Acts and
        outcomes already durable, whether the authority or a replica
+
+
+
+Muruaga                      Standards Track                   [Page 18]
+
+                           AuthZEN Composition              October 2026
+
+
        serves the read: an Act that could still be lost would give a PDP
        a history that is not a prefix of the authority's, yet of the
        length that names the authority's next position, so rule 2 would
@@ -944,15 +1037,10 @@ Muruaga                      Standards Track                   [Page 16]
        is cancelled there first, or the Act stays open).  Closed under
        that condition, the Act keeps counting at the top for the rest of
        the Mission: closing releases liveness, never the composition.
-       Closed while its effect can still land, the Act lets a later
-       Act's effect come first, the order rule 5 prevents;
-
-
-
-Muruaga                      Standards Track                   [Page 17]
-
-                           AuthZEN Composition              October 2026
-
+       That completed says that the Act's effect can no longer start or
+       still be in progress, not that it happened.  Closed while its
+       effect can still land, the Act lets a later Act's effect come
+       first, the order rule 5 prevents;
 
    8.  never forget a Mission while a request carrying it can still be
        decided: delete, truncate or rewrite none of its records, for
@@ -969,6 +1057,14 @@ Muruaga                      Standards Track                   [Page 17]
    and write to, and reach it over a channel that protects integrity: a
    history read from an impostor, or altered in transit, can leave out
    any Act.
+
+
+
+
+Muruaga                      Standards Track                   [Page 19]
+
+                           AuthZEN Composition              October 2026
+
 
    The History Authority SHOULD also restrict which writers may admit
    into a Mission to the PEPs in that Mission's enforcement scope.  Any
@@ -1002,14 +1098,6 @@ Muruaga                      Standards Track                   [Page 17]
    predicate MUST meet these five rules, and every PDP that decides for
    a Mission MUST apply the same set of Restricted Sequences to it.  A
    PDP that knows fewer sequences would permit, without mission_record,
-
-
-
-Muruaga                      Standards Track                   [Page 18]
-
-                           AuthZEN Composition              October 2026
-
-
    an Act another PDP treats as Step-matching.
 
    1.  *One order.* All Acts of a Mission that can match a step of a
@@ -1023,6 +1111,16 @@ Muruaga                      Standards Track                   [Page 18]
        step on an empty history, since a concurrent admission could
        supply the prefix.  Other Acts need not be admitted, and their
        PEPs MAY perform them without serialization.
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 20]
+
+                           AuthZEN Composition              October 2026
+
 
    3.  *Admission before effect.* The PEP MUST NOT begin the action
        until the History Authority has acknowledged the admission; an
@@ -1043,28 +1141,14 @@ Muruaga                      Standards Track                   [Page 18]
        a timeout, a server error or an unreadable answer may hide a
        commit.  A PEP MUST NOT admit an Act, or start its effect, after
        the credential carrying the Mission has expired, after the
-       Mission has ended, or, for a permit an approval produced, after
-       the approval's approved_until; it gives up instead.
+       Mission has ended, or, for a permit to a request that presented
+       an approval (context.approval), after that approval's
+       approved_until; it gives up instead.
 
    4.  *Completeness.* The PDP MUST deny with history_unavailable when
        it cannot read the Mission's history from the History Authority,
        when the positions it read are not exactly 1 to n, in that order,
        or when a record is not a valid Act Record (Section 8).
-
-
-
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 19]
-
-                           AuthZEN Composition              October 2026
-
 
    5.  *Effect order.* An Open Act may not have produced its effect yet,
        so its effect can land after that of an Act admitted later.
@@ -1086,6 +1170,14 @@ Muruaga                      Standards Track                   [Page 19]
    (Section 11); (b) the predicate is unsatisfied and no valid approval
    covers it: prohibited_composition, requestable or not as Section 5
    and Section 5.1 say; (c) rule 5: history_pending; (d) a Step-matching
+
+
+
+Muruaga                      Standards Track                   [Page 21]
+
+                           AuthZEN Composition              October 2026
+
+
    Act whose PEP has not opted in to mission_record (Section 10): plain
    deny; (e) otherwise the PDP's other policy decides, which this
    profile does not change, and a permit for a Step-matching Act carries
@@ -1095,11 +1187,11 @@ Muruaga                      Standards Track                   [Page 19]
    it is reported under (b), although the Act's outcome may later show
    that it completes nothing; a PEP MAY evaluate again after its own
    open Acts have outcomes before it submits an Access Request.  A valid
-   approval lifts (b) only: the approved Act still waits under (c) until
-   the Acts of its sequences that are open have an outcome, and a PEP
-   that has not opted in to mission_record never holds a valid approval:
-   its denial is never requestable (Section 5), and an approval binds
-   the adoption declarations (Section 5.1).
+   approval lifts (b) only: the approved Act is still held back under
+   (c) where rule 5 applies, and a PEP that has not opted in to
+   mission_record never holds a valid approval: its denial is never
+   requestable (Section 5), and an approval binds the adoption
+   declarations (Section 5.1).
 
    *Why these five.* The rules work together; none stands alone.  Rule 2
    is the only serializer across concurrent evaluations: two Acts
@@ -1114,20 +1206,33 @@ Muruaga                      Standards Track                   [Page 19]
    is sufficient, not necessary: it also holds back some Acts whose
    effects could land in either order without completing a sequence that
    Admission Order does not, such as a send held back by an open write
-
-
-
-Muruaga                      Standards Track                   [Page 20]
-
-                           AuthZEN Composition              October 2026
-
-
    of (read, write, send) when the Mission has no read (open question
    11).  Admission Order alone is not enough: a send admitted first that
    stalls, then a read admitted and run, then the send resuming, gives
    the prohibited effect order.  When the send names its payload by
    reference, such as a document a later write fills, data the read
    produced reaches it.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 22]
+
+                           AuthZEN Composition              October 2026
+
 
    *Stale reads.* A PDP that reads a view missing the latest Acts names
    a position the History Authority has already assigned, so the
@@ -1166,18 +1271,6 @@ Muruaga                      Standards Track                   [Page 20]
    steps; a flow through an operation outside the Restricted Sequences,
    or outside the enforcement scope, is not covered.
 
-
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 21]
-
-                           AuthZEN Composition              October 2026
-
-
 9.1.  One set of Restricted Sequences per Mission
 
    The set of Restricted Sequences that applies to a Mission MUST NOT
@@ -1187,6 +1280,15 @@ Muruaga                      Standards Track                   [Page 21]
    from which earlier, now relevant Acts are missing.  A PDP replica
    that applies an older or newer set also skips rule 5 for sequences it
    does not know.
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 23]
+
+                           AuthZEN Composition              October 2026
+
 
    To enforce this, a PDP MUST identify the set it applies by a policy
    digest, a stable hash of a canonical form of the set, and MUST name
@@ -1224,21 +1326,25 @@ Muruaga                      Standards Track                   [Page 21]
    old set available until the Missions pinned to it end (open question
    13 gives the interim reading).
 
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 22]
-
-                           AuthZEN Composition              October 2026
-
-
 9.2.  Policy digest
 
    A PDP computes the policy digest from the Policy Object of the set, a
    JSON object it builds from the set as it parsed it, with these
    members:
+
+
+
+
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 24]
+
+                           AuthZEN Composition              October 2026
+
 
    *  restricted_sequences, REQUIRED: an Array with one member per
       Restricted Sequence, each an Object with name (a String, with no
@@ -1285,7 +1391,13 @@ Muruaga                      Standards Track                   [Page 22]
 
 
 
-Muruaga                      Standards Track                   [Page 23]
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 25]
 
                            AuthZEN Composition              October 2026
 
@@ -1306,20 +1418,20 @@ Muruaga                      Standards Track                   [Page 23]
      }
    }
 
-   mission_record is mandatory-to-understand.  Before any effect, the
-   PEP MUST admit the Act at the Mission's History Authority at
-   expected_seq and receive the acknowledgement (rule 3).  If the
-   admission is rejected, the PEP MUST NOT act on this permit; it MAY
-   evaluate again.  After the Act, the PEP MUST record the outcome,
-   keeping one it cannot deliver and delivering it again (Section 12).
-   A PEP that cannot admit the Act and record its outcome treats the
-   permit as a deny.  When the permit also carries obligations that have
-   to be met before access, the PEP admits the Act only once they are
-   met, so that it never admits an Act it will then not perform; the
-   Obligations Core lets an Obligation Type set such an order
-   [OBLIGATIONS].  The PEP writes only to a History Authority it is
-   configured to trust; the obligation names the position, not the
-   service.
+   mission_record is carried in obligations, which is mandatory-to-
+   understand [OBLIGATIONS].  Before any effect, the PEP MUST admit the
+   Act at the Mission's History Authority at expected_seq and receive
+   the acknowledgement (rule 3).  If the admission is rejected, the PEP
+   MUST NOT act on this permit; it MAY evaluate again.  After the Act,
+   the PEP MUST record the outcome, keeping one it cannot deliver and
+   delivering it again (Section 12).  A PEP that cannot admit the Act
+   and record its outcome treats the permit as a deny.  When the permit
+   also carries obligations that have to be met before access, the PEP
+   admits the Act only once they are met, so that it never admits an Act
+   it will then not perform; the Obligations Core lets an Obligation
+   Type set such an order [OBLIGATIONS].  The PEP writes only to a
+   History Authority it is configured to trust; the obligation names the
+   position, not the service.
 
    Its properties have exactly two members, both REQUIRED: mission, a
    String equal to the request's mission.id, and expected_seq, the
@@ -1341,7 +1453,7 @@ Muruaga                      Standards Track                   [Page 23]
 
 
 
-Muruaga                      Standards Track                   [Page 24]
+Muruaga                      Standards Track                   [Page 26]
 
                            AuthZEN Composition              October 2026
 
@@ -1397,16 +1509,17 @@ Muruaga                      Standards Track                   [Page 24]
 
 
 
-Muruaga                      Standards Track                   [Page 25]
+Muruaga                      Standards Track                   [Page 27]
 
                            AuthZEN Composition              October 2026
 
 
       URN of its own: the Extensibility Model has a PDP advertise in
-      capabilities the extensions it implements that have an Extension
-      Identifier (context.mission, being advisory, has none), and gives
-      a profile a profile identifier ([AUTHZEN-EXT], Placement;
-      Requirements for Profiles; Section 18);
+      capabilities the extensions it supports, by their capability URNs
+      (context.mission has none yet: its definition is to be agreed with
+      the mission-bound family), and gives a profile a profile
+      identifier ([AUTHZEN-EXT], Placement; Requirements for Profiles;
+      Section 18);
 
    *  MUST set context.reason of each denial this document requires to
       the reason it names for it, in the member ARAP uses for machine-
@@ -1420,43 +1533,46 @@ Muruaga                      Standards Track                   [Page 25]
       Mission not yet pinned, a set designated for new Missions; the
       denial does not name the set, so a deployment that applies several
       sets routes each Mission's requests to PDPs of its set (open
-      question 8).  A plain deny of check (d) carries no reason; an ARAP
-      PEP takes its next action to be none.  When the request presented
-      an approval (context.approval), a denial with one of those four
-      reasons MUST carry next_action set to retry [ARAP], except a
-      history_unavailable for a request without a Mission, which MUST
-      carry none, since waiting cannot give it one, and a PDP that the
-      History Authority tells the Mission was deleted (Section 8, item
-      8) sends none too; with retry_after where the PDP can estimate it,
-      as ARAP recommends with retry: until the reasons are registered in
-      ARAP's registry, an ARAP PEP does not recognize them, and one that
-      receives no recognized next_action, no recognized reason and no
-      context.access_request takes the next action to be none and
-      abandons a valid approval.  When such a denial answers a request
-      that presented an approval, with policy_mismatch it SHOULD include
-      retry_after: the denial is transient only because the deployment
-      routes the retry to a PDP of the Mission's set, or the PDPs' sets
-      converge, not at the same PDP with the same set.  These reasons
-      are distinct from history_not_satisfied of [MISSION-AUTHZEN],
-      which reports that a history predicate of that profile is false or
-      cannot be established from the PDP's evidence store; outside re-
-      evaluation, a deployment that applies both profiles tells them
-      apart by value, and if the predicate is also named in that family
-      (open question 4), its reasons follow that family's naming rule.
-      At a re-evaluation that presented an approval, [MISSION-AUTHZEN]
-      returns one of ARAP's five re-evaluation reasons, while this
-      document returns its own reason with an explicit next_action;
-      until the two families agree (open question 4), such a deployment
-      returns this document's reason for the checks this document
-      defines, and the PEP acts on next_action;
+      question 8).  A plain deny of check (d) carries no reason and,
+      when the request presented an approval, next_action set to none
+      [ARAP]; it carries no member of the Obligations Core, so it
+      remains a plain core DENY [AUTHZEN-EXT].  When the request
+      presented an approval (context.approval), a denial with one of
+      those four reasons MUST carry next_action set to retry [ARAP],
+      except a history_unavailable for a request without a Mission,
+      which MUST carry none, since waiting cannot give it one, and a PDP
+      that the History Authority tells the Mission was deleted
+      (Section 8, item 8) sends none too; with retry_after where the PDP
+      can estimate it, as ARAP recommends with retry: until the reasons
+      are registered in ARAP's registry, an ARAP PEP does not recognize
+      them, and one that receives no recognized next_action, no
+      recognized reason and no context.access_request takes the next
+      action to be none and abandons a valid approval.  When such a
+      denial answers a request that presented an approval, with
+      policy_mismatch it SHOULD include retry_after: the denial is
+      transient only because the deployment routes the retry to a PDP of
+      the Mission's set, or the PDPs' sets converge, not at the same PDP
+      with the same set.  These reasons are distinct from
+      history_not_satisfied of [MISSION-AUTHZEN], which reports that a
+      history predicate of that profile is false or cannot be
+      established from the PDP's evidence store; outside re-evaluation,
+      a deployment that applies both profiles tells them apart by value,
+      and if the predicate is also named in that family (open question
+      4), its reasons follow that family's naming rule.  At a re-
+      evaluation that presented an approval, [MISSION-AUTHZEN] returns
+      one of ARAP's five re-evaluation reasons, while this document
+      returns its own reason with an explicit next_action; until the two
 
 
 
-
-Muruaga                      Standards Track                   [Page 26]
+Muruaga                      Standards Track                   [Page 28]
 
                            AuthZEN Composition              October 2026
 
+
+      families agree (open question 4), such a deployment returns this
+      document's reason for the checks this document defines, and the
+      PEP acts on next_action;
 
    *  applies the fail-closed rules of a single evaluation to each
       request of a batch: a history it cannot read or use denies that
@@ -1494,30 +1610,22 @@ Muruaga                      Standards Track                   [Page 26]
       to client.actor, so that the approval scope (Section 5.1) can
       compare it.  ARAP lets a PEP normalize the actor in an Access
       Request submission; until the Working Group settles how the actor
-      is carried at re-evaluation (openid/authzen issue #744), this
-      profile requires the member the denied evaluation used;
-
-
-
-
-
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 27]
-
-                           AuthZEN Composition              October 2026
-
+      is carried at re-evaluation (openid/authzen issue #744; draft PR
+      #756), this profile requires the member the denied evaluation
+      used;
 
    *  MUST carry in action.properties or resource.properties every
       argument of the call that decides what its effect discloses, or to
       whom (the content written or sent, each attachment; the target
       itself is the resource), evaluate the resource by its canonical
+
+
+
+Muruaga                      Standards Track                   [Page 29]
+
+                           AuthZEN Composition              October 2026
+
+
       identifier (Section 7), perform exactly the evaluated action, with
       exactly the evaluated properties, on the resource that was
       evaluated, and record that identifier.  The Authorization API
@@ -1549,9 +1657,90 @@ Muruaga                      Standards Track                   [Page 27]
 
    *  records the outcome after the Act, and MUST NOT record failed
       unless it knows the action had no effect, for example the resource
-      rejected the call before acting.  A timeout, a lost response or a
-      crash is not proof of non-execution: the PEP leaves the Act open,
-      which the PDP evaluates at the conservative top;
+      rejected the call before acting, and MUST NOT send the Act's call
+      again once it has recorded failed for it or kept one to deliver.
+      A timeout, a lost response, a crash, or Execution Evidence
+      [MISSION-EVIDENCE] with outcome failed (unlike suppressed, which
+      says the action was not attempted) is not proof of non-execution:
+      the PEP leaves the Act open, which the PDP evaluates at the
+      conservative top;
+
+   *  MUST NOT send again, itself or through a layer that resends for it
+      (a client library, a proxy, a service mesh), under its admission,
+      the call it made for an Act admitted on a permit to a request that
+      presented an approval (context.approval), whatever came of the
+      earlier call (a timeout, a server error, an unreadable or lost
+      response, a crash), unless rule 3 still lets it start the Act's
+      effect, and either it knows that the earlier call had no effect
+      and never will (what recording failed needs), or the resource
+      performs at most once the calls that carry one key (an idempotency
+
+
+
+Muruaga                      Standards Track                   [Page 30]
+
+                           AuthZEN Composition              October 2026
+
+
+      key), an earlier call still in progress included, still holds the
+      key the PEP sent with each of them, and the call sent again
+      carries that key: the approval covers one Act (Section 5.1), and a
+      call sent again performs its effect again with no approver seeing
+      it.  A repeat evaluated as a new Act is not such a call
+      (Section 15, Repeated effects);
+
+   *  before it evaluates a repeat of one of its own Open Acts
+      (Section 15, Repeated effects), SHOULD learn that Act's outcome
+      from the resource where the resource offers a way to ask about
+      that call (a lookup by the key the PEP sent, or a status query on
+      an operation the resource returned for it), and record it as the
+      bullets above allow, so that the PDP and the approver decide on a
+      known outcome (Section 5.1): completed only where the resource
+      ties the effect to that call, which the resource's state alone
+      does not, since another Act, another Mission or a person may have
+      produced it (an invoice that reads paid), and with classes only
+      from that call's response (Section 6); failed only where it knows
+      the earlier call had no effect and never will, which a lookup that
+      finds no record of the call does not show while the call can still
+      arrive, nor does the word of the agent or of the party the Act
+      sends to, nor the target's state showing no effect, which can lag
+      the call;
+
+   *  where it cannot learn that outcome, where the repeat makes the
+      earlier call again, every argument equal, not only those its
+      properties carry, for the same subject and actor, compared as
+      Section 5.1 compares them (a later call that differs in any
+      argument is its own Act, sent with a key of its own), and where
+      the resource deduplicates calls as the bullet on calls sent again
+      describes, SHOULD, while rule 3 still lets it start the earlier
+      Act's effect, send the earlier call again under that Act's
+      admission rather than evaluate the repeat (where
+      [MISSION-RUNTIME], TOCTOU and Replay, re-evaluates rather than re-
+      presents a permit on retry, here a re-evaluation is a new Act at a
+      new position, while the call sent again is the same Act and
+      performs its effect at most once; it is still decided against the
+      target as it was then, so a deployment whose targets can change
+      meaning binds a version identifier as a property (Section 5.1,
+      Scope) or keeps the time between the decision and the call short);
+      once rule 3 no longer lets it, SHOULD send the repeat, once
+      permitted and admitted, with the earlier call's key, so that the
+      effect happens at most once, and, once it learns that the effect
+      has happened, record both Acts completed, with the classes of the
+      response, since it cannot tell which call performed it.  It
+      records every outcome only as the bullets above allow: an answer
+      that the call was accepted, queued or is still in progress under
+      that key leaves the Acts open.  A PEP that lost its record of the
+
+
+
+Muruaga                      Standards Track                   [Page 31]
+
+                           AuthZEN Composition              October 2026
+
+
+      earlier Act, after a restart or a handoff, can do none of this,
+      and only what the approver is shown covers the repeat
+      (Section 5.1);
 
    *  MUST give every admission an admission_id it generates for that
       admission (an admission without one cannot be told from another at
@@ -1562,24 +1751,17 @@ Muruaga                      Standards Track                   [Page 27]
       it with that admission_id, durably across restarts, and deliver it
       again later, until the History Authority records it or refuses it
       for good: the Act already holds another outcome, there is no Act
-
-
-
-Muruaga                      Standards Track                   [Page 28]
-
-                           AuthZEN Composition              October 2026
-
-
       at that position, or the Act there belongs to another admission.
-      A refusal for good is an incident, except the refusal, for want of
-      an Act, of a failed delivered for an admission the PEP gave up on
-      (rule 3): an outcome the PEP did not write now stands for the Act
-      (an operator closed it, Section 8, item 7, or another holder of
-      the PEP's writer identity reported it), or the History Authority
-      lost an Act it acknowledged (item 3) and may have given its
-      position to another.  Until the outcome is recorded, an Act that
-      is still open is evaluated at the conservative top, which never
-      weakens the predicate.
+      A refusal for good is an incident, except the refusal of a failed
+      delivered for an admission the PEP gave up on (rule 3) because no
+      Act of that admission holds its position (none, or another
+      admission's): an outcome the PEP did not write now stands for the
+      Act (an operator closed it, Section 8, item 7, or another holder
+      of the PEP's writer identity reported it), or the History
+      Authority lost an Act it acknowledged (item 3) and may have given
+      its position to another.  Until the outcome is recorded, an Act
+      that is still open is evaluated at the conservative top, which
+      never weakens the predicate.
 
 13.  Conformance
 
@@ -1604,6 +1786,14 @@ Muruaga                      Standards Track                   [Page 28]
    *  A deployment conforms if its PDPs, PEPs and History Authority
       conform, it meets rule 1, gives every PDP of a Mission the same
       set of Restricted Sequences (Section 9.1), and meets the
+
+
+
+Muruaga                      Standards Track                   [Page 32]
+
+                           AuthZEN Composition              October 2026
+
+
       requirements this document places on it: Mission identifiers,
       delegation and agent instances (Section 4), canonical forms
       (Section 7), where its PEPs run (Section 12), and when an operator
@@ -1617,14 +1807,6 @@ Muruaga                      Standards Track                   [Page 28]
 
    The interop vectors that accompany this draft test PDP conformance
    only.
-
-
-
-
-Muruaga                      Standards Track                   [Page 29]
-
-                           AuthZEN Composition              October 2026
-
 
 14.  Extension checklist
 
@@ -1640,12 +1822,33 @@ Muruaga                      Standards Track                   [Page 29]
    [OBLIGATIONS] and ARAP [ARAP].  Neither part defines a mandatory-to-
    understand member of its own, so there is no Extension Identifier:
    the only mandatory element, mission_record, is carried by the
-   Obligations Core's obligations member.  As the Model asks of a
-   profile, this one identifies the extensions it selects, relaxes none
-   of their requirements, defines no adoption signal of its own
-   (Section 4), and registers a profile identifier (Section 18).  The
-   items the Model asks an extension specification to define, for both
-   parts:
+   Obligations Core's obligations member.  Narrowing an approval to one
+   position (Section 5.1) adds no such member: the position is not a
+   member a PEP reads, since the PDP takes it from its own record of the
+   denial or from approval material it verifies, which the PEP passes on
+   unchanged, and the History Authority admits one Act there (rule 2).
+   A PEP that ignored the narrowing still could not make the approval
+   admit a second Act; what it has to do is admit the Act at
+   expected_seq before any effect, which mission_record requires, and a
+   denial to a PEP that has not opted in to it is never requestable
+   (Section 5).  As the Model asks of a profile, this one identifies the
+   extensions it selects, relaxes none of their requirements, defines no
+   adoption signal of its own (Section 4), and registers a profile
+   identifier (Section 18).  The items the Model asks an extension
+   specification to define, for both parts:
+
+
+
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 33]
+
+                           AuthZEN Composition              October 2026
+
 
    +=========================+=========================================+
    | Item                    | This document                           |
@@ -1674,14 +1877,6 @@ Muruaga                      Standards Track                   [Page 29]
    |                         | the Obligations Core's obligations      |
    |                         | member, which is mandatory-to-          |
    |                         | understand                              |
-
-
-
-Muruaga                      Standards Track                   [Page 30]
-
-                           AuthZEN Composition              October 2026
-
-
    +-------------------------+-----------------------------------------+
    | Mandatory-to-understand | Extension Identifier obligations, the   |
    | processing              | Obligations Core's; the opt-in is the   |
@@ -1703,6 +1898,14 @@ Muruaga                      Standards Track                   [Page 30]
    |                         | mission_record on a deny is never       |
    |                         | sent, and a PEP that receives one       |
    |                         | admits nothing.  Side effects:          |
+
+
+
+Muruaga                      Standards Track                   [Page 34]
+
+                           AuthZEN Composition              October 2026
+
+
    |                         | admission and outcome are the only      |
    |                         | ones, and happen only on a permit the   |
    |                         | PEP complies with.  In evaluation: an   |
@@ -1725,19 +1928,12 @@ Muruaga                      Standards Track                   [Page 30]
    +-------------------------+-----------------------------------------+
    | Composition             | Obligations Core (fail closed), ARAP    |
    |                         | (escalation, approval scope narrowed    |
-   |                         | to one use at one position,             |
-   |                         | Section 5.1), delegation (delegated     |
-   |                         | Acts carry the delegator's Mission,     |
-   |                         | Section 4), bounded grants (openid/     |
-   |                         | authzen issue #521; both may apply)     |
-
-
-
-Muruaga                      Standards Track                   [Page 31]
-
-                           AuthZEN Composition              October 2026
-
-
+   |                         | to one position, where one Act is       |
+   |                         | admitted, Section 5.1), delegation      |
+   |                         | (delegated Acts carry the delegator's   |
+   |                         | Mission, Section 4), bounded grants     |
+   |                         | (openid/authzen issue #521; both may    |
+   |                         | apply)                                  |
    +-------------------------+-----------------------------------------+
    | Placement               | Access Evaluation and Search: the       |
    |                         | request context.  Access Evaluations    |
@@ -1757,6 +1953,14 @@ Muruaga                      Standards Track                   [Page 31]
 
    *  *Omission.* Defeated by a gapless order read from the History
       Authority, not from the caller.
+
+
+
+
+Muruaga                      Standards Track                   [Page 35]
+
+                           AuthZEN Composition              October 2026
+
 
    *  *Forged history or classes.* The agent supplies neither.  A
       compromised PEP can mislabel the Acts it enforces and, like any
@@ -1785,15 +1989,6 @@ Muruaga                      Standards Track                   [Page 31]
       same way.  Open question 12 also asks whether mission_record
       should name the authority.
 
-
-
-
-
-Muruaga                      Standards Track                   [Page 32]
-
-                           AuthZEN Composition              October 2026
-
-
    *  *Writer authentication.* The guarantee rests on the History
       Authority knowing which PEP wrote each record.  A writer identity
       taken from a presented name lets any caller mark another PEP's
@@ -1810,16 +2005,25 @@ Muruaga                      Standards Track                   [Page 32]
       an Act and its record cannot hide a sensitive read.  An Open Act
       is resolved by a later report from its PEP, by an operator closing
       it at the top (Section 8, item 7), or by the end of the Mission.
-      Until then it holds back the Acts of its sequences (rule 5).  An
-      operator can close it only once its effect can no longer happen:
-      for a deferred effect the resource holds, such as a queued send
-      that names its attachment by reference, stopping the PEP is not
-      enough.  An admission that reaches the History Authority only
-      after its PEP gave up on it, and after the failed that PEP
-      delivered was refused because no Act was there yet, is stranded
-      the same way.  A history_pending denial is not requestable: a
-      person cannot approve an Act past an effect that may still be in
-      progress.
+      Until then it holds back the Acts of its sequences, unless both
+      match the same single step (rule 5).  An operator can close it
+      only once its effect can no longer happen: for a deferred effect
+      the resource holds, such as a queued send that names its
+      attachment by reference, stopping the PEP is not enough.  An
+
+
+
+Muruaga                      Standards Track                   [Page 36]
+
+                           AuthZEN Composition              October 2026
+
+
+      admission that reaches the History Authority only after its PEP
+      gave up on it, and after the failed that PEP delivered was refused
+      because no Act was there yet, is stranded the same way.  A
+      history_pending denial is not requestable: a person cannot approve
+      an Act past an effect that may still be in progress where rule 5
+      keeps the two in order.
 
    *  *Decision and effect at different times.* The predicate holds at
       the moment each Act is admitted.  It also holds for effects that
@@ -1828,6 +2032,57 @@ Muruaga                      Standards Track                   [Page 32]
       (lasting effects).  An integration that records completed on
       acceptance, or a lasting effect that policy did not mark, breaks
       the guarantee without any visible error.
+
+   *  *Repeated effects.* The predicate and an approval bound admitted
+      Acts, not executions.  A PEP whose call times out leaves the Act
+      open, and only the resource knows whether its effect happened.  A
+      repeat, a later Act with the same action and resource, is a new
+      Act at a new position.  A repeat of an Open Act matches the steps
+      that Act matches, both being at the conservative top, so rule 5
+      does not hold it back where it matches exactly one step of each
+      sequence it matches.  A repeat of an Act an approval admitted
+      completes the same sequences again, unless outcomes recorded since
+      leave one of their other steps unfilled, so it needs a new
+      approval; where the denial is requestable, an approver is asked
+      while the earlier attempt may still be in progress, and approving
+      does not resolve that attempt: if it ran or still runs, the effect
+      happens twice.  Only the resource can tell whether the earlier
+      attempt ran, or make a repeat safe by deduplicating it.  The PEP's
+      checks before a repeat (Section 12) are hygiene, not the
+      mechanism: a PEP that lost its record of the earlier call cannot
+      tell that a call repeats it, and what can still reach the
+      approver, where the Access Request Service can see the history
+      (Section 5.1; open question 14), is the open Act the History
+      Authority holds.  Open question 16 asks whether the PDP should
+      hold the repeat back; draft PR #759 proposes the corresponding
+      consideration for ARAP.
+
+   *  *Deduplication keys.* A key the PEP sends (Section 12) identifies
+      a call, not the effect it carries out: it keeps that call, sent
+      again with the key, from taking effect twice, but not the same
+      effect carried out under another key, by a call with other
+      arguments, by a PEP that lost its record of the first call, or in
+      another Mission, whose Acts the approver here is not shown.  Where
+      an effect must happen once, the resource deduplicates on what
+      identifies it, such as the invoice a payment settles
+      ([MISSION-RUNTIME], TOCTOU and Replay); no mission.id, position or
+
+
+
+Muruaga                      Standards Track                   [Page 37]
+
+                           AuthZEN Composition              October 2026
+
+
+      admission_id identifies it, nor a key that changes with the
+      version of the record the effect acts on.  Where [MISSION-RUNTIME]
+      also applies and its permits are single use, its enforcing
+      component refuses a second presentation of a consumed permit, so a
+      call is not sent again under one; and for actions in its high-
+      consequence classes its idempotency claim holds back a repeat that
+      carries the earlier key ([MISSION-AUTHZEN], duplicate_suppressed),
+      so such a deployment repeats with the earlier idempotency_key and
+      acts on that denial.
 
    *  *Policy change and rollout.* Pinning the policy digest per Mission
       (Section 9.1) turns version skew between PDP replicas into a
@@ -1839,16 +2094,6 @@ Muruaga                      Standards Track                   [Page 32]
       deployment SHOULD designate the set it means new Missions to get.
       A Mission keeps its set for its whole life, so a stricter set
       protects only the Missions pinned after it is designated.
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 33]
-
-                           AuthZEN Composition              October 2026
-
 
    *  *Naming.* The agent chooses the strings it asks for.  Matching on
       the PEP's canonical identifier of the resolved target (Section 7)
@@ -1877,6 +2122,14 @@ Muruaga                      Standards Track                   [Page 33]
       Many reads each classified public can together reveal what none
       does; the predicate does not see that.  A declared label domain
       that recognizes public recognizes it for every sequence, so such
+
+
+
+Muruaga                      Standards Track                   [Page 38]
+
+                           AuthZEN Composition              October 2026
+
+
       reads are not even caught by the conservative top; where
       aggregation matters, key the originating step on the action and
       resource rather than on a class.
@@ -1885,7 +2138,10 @@ Muruaga                      Standards Track                   [Page 33]
       of the response it describes.  A step after the originating read
       that requires a sensitive class is missed when an intermediate
       operation honestly reclassifies its output; leaving later steps
-      without class patterns avoids this (Section 7).
+      without class patterns avoids this (Section 7), and so does
+      carrying labels forward, giving a derived output labels at least
+      as restrictive as those of its inputs ([MISSION-WORK-PRODUCTS],
+      Artifact-Lineage Label Persistence).
 
    *  *Mission identifier collision.* Two issuers that mint the same
       mission.id, by accident or because a federated issuer mints
@@ -1898,14 +2154,6 @@ Muruaga                      Standards Track                   [Page 33]
       pinned to, which can lack a sequence of the set designated when
       the later one started, and an Act of that sequence then runs
       unadmitted.  A designation does not prevent this, since the
-
-
-
-Muruaga                      Standards Track                   [Page 34]
-
-                           AuthZEN Composition              October 2026
-
-
       History Authority sees no new Mission.  Hence the uniqueness the
       guarantee assumes (Section 4); a History Authority that is given
       the issuer with each admission and read SHOULD record the first
@@ -1915,8 +2163,10 @@ Muruaga                      Standards Track                   [Page 34]
    *  *Approval state across replicas.* A replica honors an approval
       only if it can verify it, from shared state or from approval
       material such as a signed approval.state, and check its current
-      status as ARAP requires [ARAP]; one that cannot denies a valid
-      approval, which is safe but stops the ARAP flow.
+      status as ARAP requires [ARAP]; one that cannot denies; where only
+      its status source was unreachable it signals retry (Section 5.1,
+      Re-evaluation), and otherwise the approval is lost: the PEP
+      requests again where the denial is requestable, or stops.
 
    *  *Mission splitting.* An agent that can open a new Mission at will
       starts a fresh, empty history and escapes the predicate.  So does
@@ -1928,6 +2178,14 @@ Muruaga                      Standards Track                   [Page 34]
    *  *Flows between Missions.* The predicate sees one Mission's Acts.
       Data that one Mission's Act puts in a resource another Mission can
       reach, at the same time or later, leaves the guarantee: a document
+
+
+
+Muruaga                      Standards Track                   [Page 39]
+
+                           AuthZEN Composition              October 2026
+
+
       written in Mission A and sent, by reference or after a read, in
       Mission B completes no sequence in either.  This holds for every
       shared resource (a document store, a mailbox, a ticket queue, an
@@ -1948,19 +2206,6 @@ Muruaga                      Standards Track                   [Page 34]
       writing salary data into what it exposes completes no sequence
       unless the canonical identifier of the written resource names its
       exposure (Section 7).
-
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 35]
-
-                           AuthZEN Composition              October 2026
-
 
    *  *Approvers.* Approvals are where every false positive goes, so
       they are where an attacker pushes.  An approver who sees only the
@@ -1988,6 +2233,15 @@ Muruaga                      Standards Track                   [Page 35]
       to one no PDP of the Mission applies, which denies every Act of
       the Mission.  Section 8, item 5, authorizes a PDP per Mission.
 
+
+
+
+
+Muruaga                      Standards Track                   [Page 40]
+
+                           AuthZEN Composition              October 2026
+
+
    *  *A PDP without this profile.* A PDP that does not implement this
       profile ignores context.mission and permits without
       mission_record, and the Act runs unadmitted.  A PEP cannot tell
@@ -2008,15 +2262,8 @@ Muruaga                      Standards Track                   [Page 35]
       the PDP SHOULD log, for each permit with mission_record, the
       Mission, expected_seq, the evaluated subject, action and resource,
       and any approval used; and the History Authority SHOULD log every
-      read.
-
-
-
-
-Muruaga                      Standards Track                   [Page 36]
-
-                           AuthZEN Composition              October 2026
-
+      read and keep, with each Act an operator closed, which operator
+      closed it.
 
    *  *Channels outside the PEPs.* A deployment cannot prove it routed
       every channel through a PEP.  The predicate sees only Acts that
@@ -2040,6 +2287,17 @@ Muruaga                      Standards Track                   [Page 36]
       mission.id, action and resource identifiers and result classes,
       and the number of classes per Act, as they bound any input.
 
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 41]
+
+                           AuthZEN Composition              October 2026
+
+
    *  *Timing.* The time a decision takes depends on whether the
       candidate matches a step and on how much history it scans, so it
       can tell an agent something about the policy.  PDPs that face
@@ -2058,21 +2316,6 @@ Muruaga                      Standards Track                   [Page 36]
       requestable denials and approvals per Mission, and need not pass
       the agent a denial's reason; the denial already does not name the
       sequence.
-
-
-
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 37]
-
-                           AuthZEN Composition              October 2026
-
 
    *  *mission_record risks.* A PDP that omits mission_record on a
       permit for a Step-matching Act, by a defect or because it applies
@@ -2103,13 +2346,23 @@ Muruaga                      Standards Track                   [Page 37]
    carry third parties' personal data, such as a recipient's address,
    and recorded_by reveals which PEPs a deployment runs.  Deployments
    restrict history reads to PDPs and auditors, keep a history no longer
+
+
+
+Muruaga                      Standards Track                   [Page 42]
+
+                           AuthZEN Composition              October 2026
+
+
    than the Mission's audit needs, and do not link Missions through
    identifiers they do not need; Mission identifiers SHOULD be opaque,
    since they travel in paths and logs.  The history exists for
    authorization and audit; using it for another purpose, such as
    monitoring the person an agent works for, is a secondary use that
    needs its own justification.  An Access Request shows the approver
-   the denied request, its resource included.
+   the denied request, its resource included, and the Acts of the
+   history that Section 5.1 lists, their resources where the approver
+   may see them.
 
 17.  Open questions
 
@@ -2120,15 +2373,6 @@ Muruaga                      Standards Track                   [Page 37]
 
    2.   Should denied attempts be recorded, so that policy can respond
         to probing?
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 38]
-
-                           AuthZEN Composition              October 2026
-
 
    3.   Is a Mission-wide sequence the right primitive, or can a vector
         of per-emitter sequences plus a cut provide the same
@@ -2141,8 +2385,14 @@ Muruaga                      Standards Track                   [Page 38]
 
    5.   An approval is bound to the history position it was denied at,
         so any Act admitted in between, even one that later fails,
-        invalidates it.  Is a looser binding, such as "no new Act
-        matching a step", worth its extra complexity?
+        invalidates it.  Is a looser binding, such as "no Act admitted
+        since, other than one recorded failed, that matches a step of a
+        sequence the denial completed", worth its extra complexity?
+        Such a binding would let an approval whose own Act is recorded
+        failed admit a second Act, against the one-Act rule of
+        Section 5.1, and so rests on the PEP's failed being true, unless
+        the PDP records which Act each approval admitted (open question
+        17).
 
    6.   A persistent Act stays in effect for the rest of the Mission.
         Should the profile model revocation (deleting the share link),
@@ -2152,6 +2402,14 @@ Muruaga                      Standards Track                   [Page 38]
    7.   A Restricted Sequence relates Acts by type and order, not by
         object.  It cannot tell a send that attaches the document the
         salary was written into from a send of an unrelated document
+
+
+
+Muruaga                      Standards Track                   [Page 43]
+
+                           AuthZEN Composition              October 2026
+
+
         later in the same Mission, so the second is a false positive
         that a person has to approve.  Should a step be able to require
         that a member of its Act (the attachment of a send) equal the
@@ -2177,39 +2435,53 @@ Muruaga                      Standards Track                   [Page 38]
         instead, and should a sequence's name, which changes no
         decision, stay part of it?
 
-
-
-
-
-Muruaga                      Standards Track                   [Page 39]
-
-                           AuthZEN Composition              October 2026
-
-
    10.  An approval covers one Act (Section 5.1).  After a matching read
         and a write, each later external send needs its own approval;
         after an approved persistent share link, each later write does.
         Should an approval be able to cover a bounded set of later Acts,
         for example every send to one recipient for the rest of the
         Mission, using ARAP's approval scope extensions [ARAP], and what
-        keeps such a scope as safe as single use under concurrent
-        admissions?
+        keeps such a scope as safe as a scope of one position under
+        concurrent admissions?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 44]
+
+                           AuthZEN Composition              October 2026
+
 
    11.  Rule 5 holds back more than soundness needs.  A send waits for
         an open write of (read, write, send) even when the Mission has
         no read, and an Act whose PEP stopped before reporting holds
-        back every Act of its sequences until an operator closes it.
-        Should rule 5 also let a candidate through when every step it
-        could fill comes after every step an open Act could fill?  That
-        rule found no leak in an exhaustive check in the accompanying
-        suite (tools/rule5_exhaustive.py), which tries every schedule of
-        up to three Acts against every sequence of two or three steps
-        over the actions a and b (with class patterns, and with or
-        without a persistent last step; no resource patterns, so an open
-        Act and the candidate fill the same steps or none in common, and
-        partly overlapping step sets are not checked); other narrower
-        rules are also sound, and a narrower rule changes only the PDP,
-        permitting more only where this draft answers history_pending.
+        back the Acts of its sequences, unless both match the same
+        single step, until an operator closes it.  Should rule 5 also
+        let a candidate through when every step it could fill comes
+        after every step an open Act could fill?  That rule found no
+        leak in an exhaustive check in the accompanying suite (tools/
+        rule5_exhaustive.py), which tries every schedule of up to three
+        Acts against every sequence of two or three steps over the
+        actions a and b (with class patterns, and with or without a
+        persistent last step; no resource patterns, so an open Act and
+        the candidate fill the same steps or none in common, and partly
+        overlapping step sets are not checked); other narrower rules are
+        also sound, and a narrower rule changes only the PDP, permitting
+        more only where this draft answers history_pending.
 
    12.  The History Authority is trusted for completeness, and
         mission_record does not name it.  Should records be signed or
@@ -2232,23 +2504,27 @@ Muruaga                      Standards Track                   [Page 39]
         for as long as it accepts requests carrying a Mission pinned to
         it.
 
+   14.  An approval's scope here includes the position, the Restricted
+        Sequences the denial completed and the actor in
+        subject.properties.act (Section 5.1), which ARAP's material does
+        not carry.  Should this profile define claims for them, for
+        example in a PDP-signed binding_token that the Access Request
+        Service carries into approval.state, so that an Access Request
+        Service independent of the PDP can return an approval the PDP
+        verifies without shared state?  The same claims could carry the
+        history the approver is shown (Section 5.1, What the approver
+        sees), for which ARAP's denial binding defines no claim.  Or
 
 
 
-
-
-Muruaga                      Standards Track                   [Page 40]
+Muruaga                      Standards Track                   [Page 45]
 
                            AuthZEN Composition              October 2026
 
 
-   14.  An approval's scope here includes the position and the
-        Restricted Sequences the denial completed (Section 5.1), which
-        ARAP's material does not carry.  Should this profile define
-        claims for them, for example in a PDP-signed binding_token that
-        the Access Request Service carries into approval.state, so that
-        an Access Request Service independent of the PDP can return an
-        approval the PDP verifies without shared state?
+        should a deployment let its Access Request Service read the
+        history at the denial's position, as an auditor reads it
+        (Section 8, item 5)?
 
    15.  Data moves between Missions through shared resources
         (Section 15, Flows between Missions).  Should a read of an
@@ -2257,10 +2533,58 @@ Muruaga                      Standards Track                   [Page 40]
         the Mission that wrote it, so that such flows complete a
         sequence in the Mission that sends?
 
+   16.  A repeat of an Open Act can be approved while the earlier Act's
+        outcome is unknown (Section 15, Repeated effects).  Should the
+        PDP hold such a repeat back with history_pending, checked before
+        (b) so that the denial is not requestable, until that outcome is
+        recorded?  No one would then be asked to approve a possible
+        duplicate.  But an Act Record holds no properties, so another
+        call to the same target would wait too, and an earlier Act whose
+        PEP stopped would hold the repeat back until an operator closes
+        it, after which the earlier Act reads as completed though
+        whether its effect happened is still unknown.  A hold keyed on
+        an idempotency key would wait only for a retry of the same call:
+        for actions in its high-consequence classes, [MISSION-AUTHZEN]
+        denies with duplicate_suppressed a request whose idempotency_key
+        and operation identity match an earlier claim whose outcome is
+        unresolved (transient, next_action retry) or completed, and a
+        call meant to run again carries a new key; here the key would
+        have to be recorded with the Act.
+
+   17.  A re-evaluation that presents an approval that was consumed or
+        whose position was taken, for an Act that still completes a
+        sequence, is denied prohibited_composition, with next_action set
+        to request where the denial is requestable and none otherwise
+        (Section 5.1), as for an approval that does not apply: no
+        registered reason tells them apart, and from the history alone a
+        PDP cannot tell the Act its approval admitted from another that
+        took the position.  If a reason for a consumed approval is
+        registered in ARAP's "AuthZEN Access Request Re-evaluation
+        Denial Reason" registry, as openid/authzen issue #737 proposes
+        (approval_consumed), for ARAP or a single-use companion to it,
+        should a PDP that can tell return it, and should the fresh
+        Access Request carry that approval.id, as that issue proposes,
+        so that the Access Request Service can show the approver the
+        earlier approval?
+
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 46]
+
+                           AuthZEN Composition              October 2026
+
+
 18.  IANA considerations
 
-   To be registered, following the registries of the Extensibility Model
-   [AUTHZEN-EXT]:
+   This document makes no request to IANA or to OpenID Foundation
+   registries.  If the AuthZEN Working Group adopts it, it would request
+   the following, in the registries of the Extensibility Model
+   [AUTHZEN-EXT], wherever the Working Group settles that AuthZEN
+   registries are kept (openid/authzen issues #597, #755):
 
    *  in the "AuthZEN JSON Members" registry: mission, in the request
       context, advisory, with no Extension Identifier, described as
@@ -2287,18 +2611,10 @@ Muruaga                      Standards Track                   [Page 40]
       Mission across PEPs, with this document as its specification;
 
    *  in a new "AuthZEN Composition Denial Reasons" registry, which this
-      document establishes for the reasons its profile part defines, as
-      the Model recommends for reason codes: the five reasons below.
+      document would establish for the reasons its profile part defines,
+      as the Model recommends for reason codes: the five reasons below.
 
-
-
-
-Muruaga                      Standards Track                   [Page 41]
-
-                           AuthZEN Composition              October 2026
-
-
-   The "AuthZEN Composition Denial Reasons" registry is under the
+   The "AuthZEN Composition Denial Reasons" registry would be under the
    "AuthZEN Parameters" registry group, with the Specification Required
    policy [RFC8126], after a two-week review on the mailing list the
    registries of [AUTHZEN] use.  Its identifiers are carried in the
@@ -2310,6 +2626,14 @@ Muruaga                      Standards Track                   [Page 41]
    short description, whether a denial with it can be requestable, the
    change controller and a reference.  The designated experts check that
    a new reason is one a PDP returns when it denies, that the
+
+
+
+Muruaga                      Standards Track                   [Page 47]
+
+                           AuthZEN Composition              October 2026
+
+
    registration says whether it can be requestable, and that it cannot
    be confused with a reason registered here or in ARAP's "AuthZEN
    Access Request Re-evaluation Denial Reason" registry, unless both
@@ -2347,32 +2671,32 @@ Muruaga                      Standards Track                   [Page 41]
        Table 2: Initial contents of the AuthZEN Composition Denial
                              Reasons registry
 
+   This document registers no Extension Identifier: its only mandatory
+   element is an Obligation Type, adopted through obligations
+   (Section 4).  Change controller: the OpenID Foundation AuthZEN
+   Working Group, if it adopts this document.  Until registered, every
+   one of these values is a placeholder (Section 1).  Until then the
+   Obligations Core accepts only registered Obligation Types and the
+   literal value custom, in supported_obligations and as a type
+   [OBLIGATIONS], and the Model gives short names only to OpenID
+   Foundation specifications [AUTHZEN-EXT]: a deployment that uses this
+   individual draft before adoption does so outside both, by agreement
+   among its own components, as the reference implementation does.
 
 
-Muruaga                      Standards Track                   [Page 42]
+
+Muruaga                      Standards Track                   [Page 48]
 
                            AuthZEN Composition              October 2026
 
 
-   This document registers no Extension Identifier: its only mandatory
-   element is an Obligation Type, adopted through obligations
-   (Section 4).  Change controller: the author until the Working Group
-   adopts this document, then the OpenID Foundation AuthZEN Working
-   Group.  Until registered, every one of these values is a placeholder
-   (Section 1).  Until then the Obligations Core accepts only registered
-   Obligation Types and the literal value custom, in
-   supported_obligations and as a type [OBLIGATIONS], and the Model
-   gives short names only to OpenID Foundation specifications
-   [AUTHZEN-EXT]: a deployment that uses this individual draft before
-   adoption does so outside both, by agreement among its own components,
-   as the reference implementation does.
-
 18.1.  OpenID Foundation registry considerations
 
    ARAP keeps OpenID Foundation registry requests apart from IANA
-   actions [ARAP].  All five reasons are also to be registered in ARAP's
-   "AuthZEN Access Request Re-evaluation Denial Reason" registry, an
-   OpenID Foundation registry:
+   actions [ARAP] (openid/authzen issue #755 questions that split).  If
+   the Working Group adopts this document, all five reasons would also
+   be registered in ARAP's "AuthZEN Access Request Re-evaluation Denial
+   Reason" registry, an OpenID Foundation registry:
 
    *  prohibited_composition: admitting the Act would complete a
       Restricted Sequence, and the approval presented, if any, does not
@@ -2403,13 +2727,6 @@ Muruaga                      Standards Track                   [Page 42]
 
 19.1.  Normative References
 
-
-
-Muruaga                      Standards Track                   [Page 43]
-
-                           AuthZEN Composition              October 2026
-
-
    [ARAP]     McGuinness, K., "AuthZEN Access Request and Approval
               Profile - Draft 1", October 2026,
               <https://github.com/openid/authzen/blob/6d5380c/profiles/
@@ -2421,6 +2738,13 @@ Muruaga                      Standards Track                   [Page 43]
               Ed., "Authorization API 1.0", 11 January 2026,
               <https://openid.net/specs/authorization-api-1_0.html>.
               OpenID AuthZEN, Final Specification.
+
+
+
+Muruaga                      Standards Track                   [Page 49]
+
+                           AuthZEN Composition              October 2026
+
 
    [AUTHZEN-EXT]
               Babeanu, A. and K. McGuinness, "AuthZEN Extensibility
@@ -2459,13 +2783,6 @@ Muruaga                      Standards Track                   [Page 43]
               RFC 3986, DOI 10.17487/RFC3986, January 2005,
               <https://www.rfc-editor.org/rfc/rfc3986>.
 
-
-
-Muruaga                      Standards Track                   [Page 44]
-
-                           AuthZEN Composition              October 2026
-
-
    [RFC6234]  Eastlake 3rd, D. and T. Hansen, "US Secure Hash Algorithms
               (SHA and SHA-based HMAC and HKDF)", RFC 6234,
               DOI 10.17487/RFC6234, May 2011,
@@ -2475,6 +2792,15 @@ Muruaga                      Standards Track                   [Page 44]
               Writing an IANA Considerations Section in RFCs", BCP 26,
               RFC 8126, DOI 10.17487/RFC8126, June 2017,
               <https://www.rfc-editor.org/rfc/rfc8126>.
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 50]
+
+                           AuthZEN Composition              October 2026
+
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
@@ -2509,49 +2835,46 @@ Muruaga                      Standards Track                   [Page 44]
               McGuinness, K., "Mission-Bound Runtime Enforcement:
               AuthZEN Profile", 2026, <https://github.com/mcguinness/
               mission-bound-authorization>.  draft-mcguinness-mission-
-              authzen, editor's copy read at commit e6c8042 (10 October
+              authzen, editor's copy read at commit 19b65a4 (18 October
               2026).
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 45]
-
-                           AuthZEN Composition              October 2026
-
 
    [MISSION-EVIDENCE]
               McGuinness, K., "Mission Runtime Evidence", 2026,
               <https://github.com/mcguinness/mission-bound-
               authorization>.  draft-mcguinness-mission-runtime-
-              evidence, editor's copy read at commit e6c8042 (10 October
+              evidence, editor's copy read at commit 19b65a4 (18 October
               2026).
 
    [MISSION-HARNESS]
               McGuinness, K., "Mission-Aware Agent Harnesses", 2026,
               <https://github.com/mcguinness/mission-bound-
               authorization>.  draft-mcguinness-mission-harness,
-              editor's copy read at commit e6c8042 (10 October 2026).
+              editor's copy read at commit 19b65a4 (18 October 2026).
+
+
+
+Muruaga                      Standards Track                   [Page 51]
+
+                           AuthZEN Composition              October 2026
+
 
    [MISSION-METERING]
               McGuinness, K., "Mission Consumption Metering", 2026,
               <https://github.com/mcguinness/mission-bound-
               authorization>.  draft-mcguinness-mission-metering,
-              editor's copy read at commit e6c8042 (10 October 2026).
+              editor's copy read at commit 19b65a4 (18 October 2026).
 
    [MISSION-RUNTIME]
               McGuinness, K., "Mission-Bound Runtime Enforcement", 2026,
               <https://github.com/mcguinness/mission-bound-
               authorization>.  draft-mcguinness-mission-runtime,
-              editor's copy read at commit e6c8042 (10 October 2026).
+              editor's copy read at commit 19b65a4 (18 October 2026).
 
    [MISSION-WORK-PRODUCTS]
               McGuinness, K., "Mission Work Products for OAuth 2.0",
               2026, <https://github.com/mcguinness/mission-bound-
               authorization>.  draft-mcguinness-oauth-mission-work-
-              products, editor's copy read at commit e6c8042 (10 October
+              products, editor's copy read at commit 19b65a4 (18 October
               2026); see its appendix on artifact-lineage label
               persistence.
 
@@ -2564,19 +2887,6 @@ Muruaga                      Standards Track                   [Page 45]
               Schneider, F. B., "Enforceable Security Policies", ACM
               Transactions on Information and System
               Security 3(1):30-50, February 2000.
-
-
-
-
-
-
-
-
-
-Muruaga                      Standards Track                   [Page 46]
-
-                           AuthZEN Composition              October 2026
-
 
    [TXN-TOKENS]
               Tulshibagwale, A., Fletcher, G., and P. Kasselman,
@@ -2595,6 +2905,15 @@ Appendix A.  Worked example (non-normative)
        with mission_record at position 2; admitted, acknowledged,
        performed, completed.
 
+
+
+
+
+Muruaga                      Standards Track                   [Page 52]
+
+                           AuthZEN Composition              October 2026
+
+
    3.  send_message to external:press@partner.example (the canonical
        identifier of the press address) at the mail PEP: the PDP reads
        positions 1 and 2.  The Restricted Sequence (read with
@@ -2603,7 +2922,8 @@ Appendix A.  Worked example (non-normative)
        requestable denial where the sequence is requestable, the PEP has
        opted in and the deployment has an Access Request Endpoint.  If a
        person approves, the PEP evaluates again with context.approval;
-       the PDP permits that one send, at that position, once.
+       the PDP permits that one send, at that position only, and only
+       one Act can be admitted there.
 
    Had the send been admitted first and stalled, the read and the write
    would have been denied history_pending until it finished.
@@ -2626,14 +2946,6 @@ Appendix B.  Formal basis (non-normative)
    admission, complete history, and effects in Admission Order for the
    Acts a sequence depends on.  Refinement of action types by result
    class, with the conservative top for unknown outcomes, and persistent
-
-
-
-Muruaga                      Standards Track                   [Page 47]
-
-                           AuthZEN Composition              October 2026
-
-
    steps, are this profile's extensions of the published result, not
    part of it.  The conformance suite checks them with property tests
    against the true effect order.
@@ -2649,6 +2961,14 @@ Appendix C.  Related work (non-normative)
       a completed sequence is that of the admitted Acts.  This profile
       adds the multi-PEP contract: one order, admission before effect,
       completeness, effect order, signaling.
+
+
+
+
+Muruaga                      Standards Track                   [Page 53]
+
+                           AuthZEN Composition              October 2026
+
 
    *  Mission-Bound Runtime Enforcement [MISSION-RUNTIME]
       [MISSION-AUTHZEN] [MISSION-EVIDENCE].  Covers: Mission context,
@@ -2672,6 +2992,8 @@ Appendix C.  Related work (non-normative)
       latch is order-blind: it also blocks the safe order, send then
       read.  One latch per group does not express length-3 sequences,
       where the same acts in a different order get different decisions.
+      A latch is also per group, not per Mission: it holds across every
+      Mission bound to the group, where this predicate sees one Mission.
 
    *  Taint and artifact-lineage labels [MISSION-HARNESS]
       [MISSION-WORK-PRODUCTS].  Covers: Taint that gates egress after
@@ -2682,20 +3004,27 @@ Appendix C.  Related work (non-normative)
       with that class, then egress.  The profile adds order and per-
       class specificity.
 
+   *  Cross-entry correspondence ([MISSION-EVIDENCE], Cross-Entry
+      Correspondence; mcguinness/mission-bound-authorization issues
+      #1019, #1051, open).  Covers: Whether the outcomes of actions at
+      different resource servers, each in its own vocabulary, correspond
+      (reserve A, pay for B).  How this profile differs: A different
+      problem: a comparison across records through a shared reference
+      and a trusted mapping between the services' fields.  Both need the
+      rule, stated there, that a missing required record is
+      inconclusive, never a pass.
 
 
 
-Muruaga                      Standards Track                   [Page 48]
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 54]
 
                            AuthZEN Composition              October 2026
 
-
-   *  Cross-entry evidence join (mcguinness/mission-bound-authorization
-      issues #1019, #1051, open).  Covers: Whether acts in different
-      vocabularies refer to the same thing (reserve A, pay for B).  How
-      this profile differs: A different problem: a semantic join on a
-      shared reference.  Both need the rule, proposed there, that a
-      missing required record is inconclusive, never a pass.
 
    *  Bounded grants (openid/authzen issue #521).  Covers: Constraints
       on a permit, including state across requests such as a spend
@@ -2741,4 +3070,11 @@ Author's Address
 
 
 
-Muruaga                      Standards Track                   [Page 49]
+
+
+
+
+
+
+
+Muruaga                      Standards Track                   [Page 55]

@@ -154,7 +154,6 @@ def test_a_submission_that_keeps_the_actor_is_bound() -> None:
 
 
 def test_other_properties_are_bound() -> None:
-
     request = EvaluationRequest(
         Subject("agent", "agent-7", properties={"tier": "gold", "act": {"sub": "o"}}),
         Action("send_message"), Resource("recipient", "external:press", properties={"act": "x"}),

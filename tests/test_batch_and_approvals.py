@@ -139,7 +139,7 @@ class _StaleView(MissionHistoryService):
 
 
 def test_stale_read_is_caught_at_admission() -> None:
-    """Attacker's stale-replica case: the PDP permits on stale history, but the
+    """A stale replica: the PDP permits on stale history, but the
     obligation names a position the authority has already used, so the
     admission fails and the send never starts."""
     authority = MissionHistoryService()
@@ -225,6 +225,64 @@ def test_approval_is_bound_to_act_and_history_position() -> None:
     assert moved.context["next_action"] == "request" and moved.access_request is not None
 
 
+class _NonRecordingPDP(CompositionPDP):
+    """A PDP that does not record an approval as used at its first permit, as
+    PDP replicas behave that verify an approval without sharing whether it was
+    used (profile, Approvals, Replicas)."""
+
+    def _consume(self, approval_id: str) -> bool:
+        return True
+
+
+@pytest.mark.parametrize("pdp_class", [CompositionPDP, _NonRecordingPDP])
+def test_an_approval_admits_one_act_whether_or_not_the_pdp_records_its_use(
+        pdp_class: type[CompositionPDP]) -> None:
+    # Profile, Approvals, Lost responses and Replicas: a PDP that does not
+    # record the use permits again at the approval's position, for a PEP whose
+    # permit response was lost, and rule 2 still admits one Act there. Once
+    # that position is taken the approval admits nothing more.
+    mhs = MissionHistoryService()
+    read_done(mhs)
+    pdp = pdp_class(CompositionPolicy((READ_SEND,)), mhs, access_request_endpoint=ARS)
+    approval = pdp.approve(_denied(pdp))
+    first = pdp.evaluate(req("send_message", "external:x", approval=approval))
+    assert first.decision
+    seq = first.obligations[0].properties["expected_seq"]
+    again = pdp.evaluate(req("send_message", "external:x", approval=approval))
+    if pdp_class is _NonRecordingPDP:
+        assert again.decision and again.obligations[0].properties["expected_seq"] == seq
+    else:
+        assert (again.decision, again.context["next_action"]) == (False, "request")
+    mhs.admit("m1", seq, "send_message", "external:x", writer="pep.mail")
+    with pytest.raises(HistoryConflict):
+        mhs.admit("m1", seq, "send_message", "external:x", writer="pep.mail.2")
+    after = pdp.evaluate(req("send_message", "external:x", approval=approval))
+    assert (after.decision, after.reason) == (False, REASON_PROHIBITED_COMPOSITION)
+    assert after.context["next_action"] == "request" and after.access_request is not None
+
+
+@pytest.mark.parametrize("pdp_class", [CompositionPDP, _NonRecordingPDP])
+def test_an_approved_act_that_loses_the_admission_race_needs_a_new_approval(
+        pdp_class: type[CompositionPDP]) -> None:
+    # Another Act takes the approval's position first, so the approved send's
+    # admission fails (rule 2). Evaluated again with the same approval it is
+    # denied with a fresh requestable denial, and nothing is permitted at the
+    # next position. For a PDP that does not record the use, the position the
+    # approval was given for is the only thing that stops a second Act.
+    mhs = MissionHistoryService()
+    read_done(mhs)
+    pdp = pdp_class(CompositionPolicy((READ_SEND,)), mhs, access_request_endpoint=ARS)
+    approval = pdp.approve(_denied(pdp))
+    permit = pdp.evaluate(req("send_message", "external:x", approval=approval))
+    seq = permit.obligations[0].properties["expected_seq"]
+    mhs.admit("m1", seq, "write_document", "d", writer="pep.doc")
+    with pytest.raises(HistoryConflict):
+        mhs.admit("m1", seq, "send_message", "external:x", writer="pep.mail")
+    again = pdp.evaluate(req("send_message", "external:x", approval=approval))
+    assert (again.decision, again.reason) == (False, REASON_PROHIBITED_COMPOSITION)
+    assert again.context["next_action"] == "request" and again.access_request is not None
+
+
 def test_expired_approval_does_not_permit() -> None:
     mhs = MissionHistoryService()
     read_done(mhs)
@@ -279,9 +337,9 @@ def test_metadata_advertises_the_obligations_core_and_mission_record() -> None:
 
 
 def test_greedy_match_is_complete_with_overlapping_steps() -> None:
-    """Concern: greedy left-to-right could miss an embedding when steps
-    overlap. Earliest-match is exact for subsequence tests; check a repeated,
-    overlapping pattern."""
+    """Greedy left-to-right matching must not miss an embedding when steps
+    overlap: earliest-match is exact for subsequence tests, checked here on a
+    repeated, overlapping pattern."""
     seq = RestrictedSequence(
         name="aab",
         steps=(SequenceStep("a*"), SequenceStep("ab"), SequenceStep("send")),

@@ -1,7 +1,7 @@
 """Effect order versus admission order: an admitted act that has not finished.
 
-The counterexample: SEND is admitted at position 1
-and stalls before its effect. READ is admitted at 2 and runs. SEND resumes.
+The counterexample: SEND is admitted at position 1 and stalls before its
+effect. READ is admitted at 2 and runs. SEND resumes.
 Admission order is SEND, READ (allowed); effect order is READ, SEND
 (prohibited). If the send carries a reference (send document Q4) rather than a
 value, data the read produced can reach it.
@@ -111,8 +111,8 @@ def test_stalled_send_blocks_read_until_it_finishes() -> None:
 
 
 def test_by_reference_send_cannot_pick_up_later_writes() -> None:
-    """k=3, by reference: SEND names
-    document Q4 by reference and stalls; READ and WRITE into Q4 must not run
+    """Three steps, by reference: SEND names document Q4 by reference and
+    stalls; READ and WRITE into Q4 must not run
     before it finishes."""
     mhs = MissionHistoryService()
     pdp = CompositionPDP(CompositionPolicy((READ_WRITE_SEND,)), mhs)
@@ -181,8 +181,7 @@ def test_acts_matching_several_steps_do_not_commute() -> None:
 
 
 def test_threaded_k3_never_realizes_read_write_send_in_effect_order() -> None:
-    """Three real PEP
-    threads (read, write, send) released together, each stalling a random
+    """Three real PEP threads (read, write, send) released together, each stalling a random
     moment between admission and effect, many rounds. Invariant: the true
     effect order never contains read, write, send as a subsequence."""
 

@@ -52,7 +52,7 @@ class Deployment:
     ledgers: list[Path] = field(default_factory=list)
     issuer_key: bytes = field(default_factory=lambda: secrets.token_bytes(32))
     tokens: dict[str, str] = field(default_factory=dict)
-    # (mission, target) pairs a person approved, for the oracle.
+    # (mission, target, attachment) triples a person approved, for the oracle.
     granted: set[tuple[str, str, str | None]] = field(default_factory=set)
     # Missions each scenario opened, to attribute leaks to scenarios.
     by_scenario: dict[str, list[str]] = field(default_factory=dict)

@@ -9,9 +9,10 @@ The AuthZEN Mission Composition Profile, with an implementation and a
 conformance suite. It lets an AuthZEN PDP deny the Act that would complete a
 prohibited sequence of Acts within one Mission, even when different PEPs enforce
 those Acts. It is based on the ordered-composition result of
-[Bounded Agents](https://arxiv.org/abs/2608.15888).
+[Bounded Agents](https://arxiv.org/abs/2608.15888). The current text is Draft 1,
+in release 0.2.0 (`CHANGELOG.md` lists what changed).
 
-> This is an individual contribution. It is not an OpenID Foundation project
+> This is an individual proposal. It is not an OpenID Foundation project
 > and not a work item of the AuthZEN Working Group. OpenID is a trademark
 > (registered in various countries) of the OpenID Foundation.
 
@@ -114,7 +115,10 @@ For approvals the reference implements ARAP's shared-state flow
 publishes its Access Request Endpoint, and resolves `evaluation_id` and
 `approval.id` from its own state; the PEP submits the Access Request, follows
 the task, and evaluates again with the approval (`AccessRequestClient`); a
-person decides through a separate approver route. It does not implement binding
+person decides through a separate approver route. Before deciding, an eligible
+approver can review the task: the prohibited sequences the denial would
+complete, and the earlier attempts at the same target with their outcome, open
+ones first. It does not implement binding
 artifacts (`binding_token`, `approval.state`), so it does not meet ARAP's
 Interoperability Baseline, which requires verifying them as JWS; the open draft
 [openid/authzen PR #738](https://github.com/openid/authzen/pull/738) proposes
@@ -312,10 +316,10 @@ name:
 
 - the Authorization API 1.0, final;
 - the Obligations Core and the Extensibility Model at openid/authzen
-  `f097170`, the head of PR #697 (14 October 2026);
+  `f097170`, in PR #697 (14 October 2026);
 - ARAP at openid/authzen `6d5380c` (13 October 2026);
-- the mission-bound drafts at mcguinness/mission-bound-authorization `e6c8042`
-  (10 October 2026).
+- the mission-bound drafts at mcguinness/mission-bound-authorization `19b65a4`
+  (18 October 2026).
 
 All but the first are drafts and will change. `CHANGELOG.md` records the
 revisions each release is pinned to.
